@@ -1,0 +1,15 @@
+.theme-light {
+  --background: 248 250 252; /* slate-50 */
+  --foreground: 15 23 42;    /* slate-900 */
+
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+
+  --primary: 15 23 42;
+  --primary-foreground: 248 250 252;
+
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+
+  --border: 226 232 240;
+}
