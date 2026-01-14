@@ -1,4 +1,5 @@
 import React from "react";
+
 import { Card } from "src/shared/ui/Card/Card";
 
 type Props = {

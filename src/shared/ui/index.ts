@@ -10,3 +10,7 @@ export * from "./KpiCard/KpiCard";
 export * from "./PageShell/PageShell";
 export * from "./DonutChart/DonutChart";
 export * from "./CardButton/CardButton";
+export * from "./Modal/Modal";
+export * from "./InlineError/InlineError";
+export * from "./FormField/FormField";
+export * from "./Textarea/TextArea";

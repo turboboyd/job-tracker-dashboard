@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
+import React, { useEffect, useMemo, useState } from "react";
 
 type Slice = {
   label: string;

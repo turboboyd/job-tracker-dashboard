@@ -1,5 +1,6 @@
-import React, { useState } from "react";
 import { motion } from "framer-motion";
+import React, { useState } from "react";
+
 import { Button } from "src/shared/ui/Button/Button";
 
 type Props = {
@@ -8,11 +9,7 @@ type Props = {
   onGo: () => void;
   done?: boolean;
   className?: string;
-
-  /** if true, icon shakes (used on hover of Go button) */
   iconShake?: boolean;
-
-  /** optional: allow parent to control hover without internal state */
   onGoHoverChange?: (hovered: boolean) => void;
 };
 
@@ -64,7 +61,9 @@ export function ActionRow({
         </motion.div>
 
         <div className="min-w-0">
-          <div className="truncate text-sm font-medium text-foreground">{title}</div>
+          <div className="truncate text-sm font-medium text-foreground">
+            {title}
+          </div>
         </div>
       </div>
 
