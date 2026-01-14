@@ -6,6 +6,8 @@ import {
   signOut as fbSignOut,
   setPersistence,
   browserLocalPersistence,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 import React, { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -22,7 +24,13 @@ type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isAuthReady: boolean;
+
   signInWithGoogle: () => Promise<void>;
+
+  // ✅ добавили
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  signUpWithEmail: (email: string, password: string) => Promise<void>;
+
   signOut: () => Promise<void>;
 };
 
@@ -43,6 +51,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence).catch(() => {
+      // ignore
     });
 
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -58,6 +67,16 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     await signInWithPopup(auth, provider);
   }, []);
 
+  // ✅ email/password sign-in
+  const signInWithEmail = useCallback(async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  }, []);
+
+  // ✅ email/password sign-up
+  const signUpWithEmail = useCallback(async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
+  }, []);
+
   const signOut = useCallback(async () => {
     await fbSignOut(auth);
   }, []);
@@ -68,9 +87,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       isAuthenticated: Boolean(user),
       isAuthReady,
       signInWithGoogle,
+      signInWithEmail,
+      signUpWithEmail,
       signOut,
     }),
-    [user, isAuthReady, signInWithGoogle, signOut]
+    [user, isAuthReady, signInWithGoogle, signInWithEmail, signUpWithEmail, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
