@@ -26,8 +26,6 @@ type AuthContextValue = {
   isAuthReady: boolean;
 
   signInWithGoogle: () => Promise<void>;
-
-  // ✅ добавили
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
 

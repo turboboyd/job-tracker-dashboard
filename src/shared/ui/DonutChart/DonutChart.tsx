@@ -1,10 +1,15 @@
-import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion";
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  animate,
+} from "framer-motion";
+import  { useEffect, useMemo, useState } from "react";
 
 type Slice = {
   label: string;
   value: number;
-  className: string; // tailwind stroke class
+  className: string; 
 };
 
 type Props = {
@@ -15,36 +20,23 @@ type Props = {
   slices: Slice[];
   size?: number;
   stroke?: number;
-
   animateOnMount?: boolean;
   drawDuration?: number;
   stagger?: number;
-
-  /** gap between segments along circumference (px) */
   gapPx?: number;
-
-  /** invisible hover stroke extra width */
   hitSlop?: number;
-
-  /** padding around svg so hover/glow won't clip */
   padPx?: number;
-
-  /**
-   * If true: z-order is controlled by slices[] order (default).
-   * If false: z-order follows arc order.
-   */
   zOrderBySlices?: boolean;
 };
 
 type Segment = Slice & {
-  idx: number; // stable id in arc order
+  idx: number; 
   frac: number;
   rawDash: number;
   visibleDash: number;
   dasharray: string;
   dashoffset: number;
 
-  // base layer priority (bigger = closer to top). Derived from slices[] order
   baseZ: number;
 };
 
@@ -80,32 +72,38 @@ export function DonutChart({
 
   const hasData = total > 0;
 
-  // baseZ map from slices[] order:
-  // later in slices[] => higher baseZ => drawn later => visually on top.
   const baseZByLabel = useMemo(() => {
     const m = new Map<string, number>();
     slices.forEach((s, i) => m.set(s.label, i));
     return m;
   }, [slices]);
 
-  // Build segments in ARC order (clockwise) using slices order (filtered by non-zero)
   const segmentsArc = useMemo<Segment[]>(() => {
     const nonZero = slices.filter((s) => s.value > 0);
-
-    let offsetAcc = 0;
     const startFromTop = circumference * 0.25;
+
+    const rawDashes = nonZero.map((s) => {
+      const frac = total > 0 ? s.value / total : 0;
+      return Math.max(0, frac * circumference);
+    });
+
+    const offsets = rawDashes.reduce<number[]>((acc, dash, i) => {
+      if (i === 0) return [0];
+      return [...acc, acc[i - 1] + rawDashes[i - 1]];
+    }, []);
 
     return nonZero.map((s, arcIdx) => {
       const frac = total > 0 ? s.value / total : 0;
-      const rawDash = Math.max(0, frac * circumference);
+      const rawDash = rawDashes[arcIdx] ?? 0;
 
-      // reduce visible dash to create a small gap between segments
       const visibleDash = Math.max(0, rawDash - gapPx);
-      const dasharray = `${visibleDash} ${Math.max(0, circumference - visibleDash)}`;
+      const dasharray = `${visibleDash} ${Math.max(
+        0,
+        circumference - visibleDash
+      )}`;
 
-      // shift slightly to center the gap
+      const offsetAcc = offsets[arcIdx] ?? 0;
       const dashoffset = startFromTop - offsetAcc + gapPx / 2;
-      offsetAcc += rawDash;
 
       const baseZ = baseZByLabel.get(s.label) ?? 0;
 
@@ -129,13 +127,11 @@ export function DonutChart({
     return segmentsArc.find((s) => s.label === activeKey) ?? null;
   }, [activeKey, segmentsArc]);
 
-  // ✅ Z-order:
-  // 1) Decide base order (by slices[] OR by arc order)
-  // 2) Move active segment to the very end (top-most)
+
   const segmentsForRender = useMemo(() => {
     const base = zOrderBySlices
-      ? [...segmentsArc].sort((a, b) => a.baseZ - b.baseZ) // bottom -> top
-      : [...segmentsArc]; // arc order as-is
+      ? [...segmentsArc].sort((a, b) => a.baseZ - b.baseZ) 
+      : [...segmentsArc]; 
 
     if (!activeKey) return base;
 
@@ -143,7 +139,7 @@ export function DonutChart({
     if (!activeSeg) return base;
 
     const rest = base.filter((s) => s.label !== activeKey);
-    return [...rest, activeSeg]; // active drawn last => top
+    return [...rest, activeSeg];
   }, [segmentsArc, activeKey, zOrderBySlices]);
 
   const centerTopMaybeNumber = toNumberOrNull(centerTop);
@@ -162,7 +158,13 @@ export function DonutChart({
         >
           <svg width={outer} height={outer} viewBox={`0 0 ${outer} ${outer}`}>
             <defs>
-              <filter id="donutGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <filter
+                id="donutGlow"
+                x="-50%"
+                y="-50%"
+                width="200%"
+                height="200%"
+              >
                 <feGaussianBlur stdDeviation="2.2" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
@@ -171,7 +173,6 @@ export function DonutChart({
               </filter>
             </defs>
 
-            {/* background ring */}
             <circle
               cx={cx}
               cy={cy}
@@ -191,7 +192,6 @@ export function DonutChart({
 
                 return (
                   <g key={`seg-${seg.label}`}>
-                    {/* HIT RING (transparent, captures hover precisely even when segments overlap) */}
                     <circle
                       cx={cx}
                       cy={cy}
@@ -213,7 +213,6 @@ export function DonutChart({
                       onBlur={() => setActiveKey(null)}
                     />
 
-                    {/* VISIBLE SEGMENT */}
                     <motion.circle
                       cx={cx}
                       cy={cy}
@@ -223,7 +222,10 @@ export function DonutChart({
                       className={seg.className}
                       strokeDashoffset={seg.dashoffset}
                       vectorEffect="non-scaling-stroke"
-                      style={{ pointerEvents: "none", transformOrigin: "50% 50%" }}
+                      style={{
+                        pointerEvents: "none",
+                        transformOrigin: "50% 50%",
+                      }}
                       initial={
                         animateOnMount
                           ? {
@@ -237,7 +239,6 @@ export function DonutChart({
                       animate={{
                         strokeDasharray: targetDasharray,
 
-                        // focus effect (now safe because z-order is deterministic)
                         opacity: isActive ? 1 : activeKey ? 0.62 : 1,
                         scale: isActive ? 1.012 : 1,
                         strokeWidth: isActive ? stroke + 2 : stroke,
@@ -246,7 +247,7 @@ export function DonutChart({
                       transition={{
                         strokeDasharray: {
                           duration: drawDuration,
-                          delay: seg.baseZ * stagger, // stagger by base order looks nicer
+                          delay: seg.baseZ * stagger, 
                           ease: [0.2, 0.8, 0.2, 1],
                         },
                         opacity: { duration: 0.15, ease: "easeOut" },
@@ -271,14 +272,20 @@ export function DonutChart({
             )}
           </svg>
 
-          {/* Center labels */}
+
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
             <div className="text-center">
               <div className="text-2xl font-semibold text-foreground leading-none">
-                {centerTopMaybeNumber == null ? centerTop : <AnimatedNumber value={centerTopMaybeNumber} />}
+                {centerTopMaybeNumber == null ? (
+                  centerTop
+                ) : (
+                  <AnimatedNumber value={centerTopMaybeNumber} />
+                )}
               </div>
 
-              <div className="mt-1 text-xs text-muted-foreground">{centerBottom}</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                {centerBottom}
+              </div>
 
               <AnimatePresence>
                 {active && (
@@ -290,8 +297,15 @@ export function DonutChart({
                     transition={{ duration: 0.16, ease: [0.2, 0.8, 0.2, 1] }}
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <span className={["h-2 w-2 rounded-full", dotClassFromStroke(active.className)].join(" ")} />
-                      <span className="truncate font-medium">{active.label}</span>
+                      <span
+                        className={[
+                          "h-2 w-2 rounded-full",
+                          dotClassFromStroke(active.className),
+                        ].join(" ")}
+                      />
+                      <span className="truncate font-medium">
+                        {active.label}
+                      </span>
                     </div>
                     <div className="mt-0.5 text-center text-muted-foreground">
                       {active.value} • {Math.round(active.frac * 100)}%
@@ -319,8 +333,15 @@ export function DonutChart({
                 onMouseLeave={() => setActiveKey(null)}
               >
                 <div className="flex min-w-0 items-center gap-2">
-                  <span className={["h-2.5 w-2.5 rounded-full", dotClassFromStroke(s.className)].join(" ")} />
-                  <span className="truncate text-sm text-foreground">{s.label}</span>
+                  <span
+                    className={[
+                      "h-2.5 w-2.5 rounded-full",
+                      dotClassFromStroke(s.className),
+                    ].join(" ")}
+                  />
+                  <span className="truncate text-sm text-foreground">
+                    {s.label}
+                  </span>
                 </div>
 
                 <motion.span
@@ -337,7 +358,9 @@ export function DonutChart({
 
           <div className="pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{totalLabel}</span>
+              <span className="text-xs text-muted-foreground">
+                {totalLabel}
+              </span>
               <span className="text-xs text-muted-foreground">{total}</span>
             </div>
           </div>

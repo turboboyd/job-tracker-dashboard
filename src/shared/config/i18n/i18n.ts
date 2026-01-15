@@ -1,10 +1,10 @@
 import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { initReactI18next } from "react-i18next";
 
+import de from "../../../../extractedTranslations/de/translation.json";
 import en from "../../../../extractedTranslations/en/translation.json";
 import ru from "../../../../extractedTranslations/ru/translation.json";
-import de from "../../../../extractedTranslations/de/translation.json";
 import uk from "../../../../extractedTranslations/uk/translation.json";
 
 export const supportedLngs = ["en", "ru", "de", "uk"] as const;
