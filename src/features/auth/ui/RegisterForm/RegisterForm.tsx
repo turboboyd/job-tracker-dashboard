@@ -8,13 +8,14 @@ import { Button, FormField, InlineError, Input } from "src/shared/ui";
 
 import { GoogleSignInButton } from "../GoogleSignInButton/GoogleSignInButton";
 
-export type LoginFormProps = {
+export type RegisterFormProps = {
   onSuccess: (from: string) => void;
 };
 
-type LoginValues = {
+type RegisterValues = {
   email: string;
   password: string;
+  confirmPassword: string;
 };
 
 type FirebaseAuthError = {
@@ -28,11 +29,10 @@ function mapFirebaseAuthError(e: unknown, t: (key: string) => string): string {
     switch (err.code) {
       case "auth/invalid-email":
         return t("auth.errors.invalidEmail");
-      case "auth/invalid-credential":
-      case "auth/wrong-password":
-        return t("auth.errors.wrongPassword");
-      case "auth/user-not-found":
-        return t("auth.errors.userNotFound");
+      case "auth/email-already-in-use":
+        return t("auth.errors.emailAlreadyInUse");
+      case "auth/weak-password":
+        return t("auth.errors.weakPassword");
       case "auth/too-many-requests":
         return t("auth.errors.tooManyRequests");
       case "auth/network-request-failed":
@@ -48,16 +48,16 @@ function mapFirebaseAuthError(e: unknown, t: (key: string) => string): string {
   return normalizeError(e);
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const { t } = useTranslation();
-  const { signInWithEmail } = useAuth();
+  const { signUpWithEmail } = useAuth();
 
-  const initialValues = useMemo<LoginValues>(
-    () => ({ email: "", password: "" }),
+  const initialValues = useMemo<RegisterValues>(
+    () => ({ email: "", password: "", confirmPassword: "" }),
     []
   );
 
-  const schema = useMemo<Yup.ObjectSchema<LoginValues>>(
+  const schema = useMemo<Yup.ObjectSchema<RegisterValues>>(
     () =>
       Yup.object({
         email: Yup.string()
@@ -67,29 +67,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         password: Yup.string()
           .min(6, t("auth.validation.passwordMin"))
           .required(t("auth.validation.passwordRequired")),
+        confirmPassword: Yup.string()
+          .oneOf([Yup.ref("password")], t("auth.validation.passwordsMustMatch"))
+          .required(t("auth.validation.confirmPasswordRequired")),
       }),
     [t]
   );
 
   return (
     <div className="space-y-4">
-      <GoogleSignInButton
-        onSuccess={(from) => onSuccess(from)}
-        onError={() => {}}
-      />
+      <GoogleSignInButton onSuccess={(from) => onSuccess(from)} onError={() => {}} />
 
       <div className="relative py-1">
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-xs text-muted-foreground">
-            {t("auth.or")}
-          </span>
+          <span className="bg-card px-2 text-xs text-muted-foreground">{t("auth.or")}</span>
         </div>
       </div>
 
-      <Formik<LoginValues>
+      <Formik<RegisterValues>
         initialValues={initialValues}
         validationSchema={schema}
         validateOnBlur
@@ -98,7 +96,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
           helpers.setStatus(undefined);
 
           try {
-            await signInWithEmail(values.email.trim(), values.password);
+            await signUpWithEmail(values.email.trim(), values.password);
             onSuccess("");
           } catch (e) {
             helpers.setStatus(mapFirebaseAuthError(e, t));
@@ -106,8 +104,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         }}
       >
         {(f) => {
-          const commonError =
-            typeof f.status === "string" ? f.status : undefined;
+          const commonError = typeof f.status === "string" ? f.status : undefined;
           const disabled = f.isSubmitting;
 
           return (
@@ -118,11 +115,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                 <FormField
                   label={t("auth.email")}
                   required
-                  error={
-                    f.touched.email
-                      ? (f.errors.email as string | undefined)
-                      : undefined
-                  }
+                  error={f.touched.email ? (f.errors.email as string | undefined) : undefined}
                 >
                   {({ id, describedBy, invalid }) => (
                     <Input
@@ -145,11 +138,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                 <FormField
                   label={t("auth.password")}
                   required
-                  error={
-                    f.touched.password
-                      ? (f.errors.password as string | undefined)
-                      : undefined
-                  }
+                  error={f.touched.password ? (f.errors.password as string | undefined) : undefined}
                 >
                   {({ id, describedBy, invalid }) => (
                     <Input
@@ -164,27 +153,46 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                       aria-invalid={invalid}
                       aria-describedby={describedBy}
                       disabled={disabled}
-                      autoComplete="current-password"
+                      autoComplete="new-password"
+                    />
+                  )}
+                </FormField>
+
+                <FormField
+                  label={t("auth.confirmPassword")}
+                  required
+                  error={
+                    f.touched.confirmPassword
+                      ? (f.errors.confirmPassword as string | undefined)
+                      : undefined
+                  }
+                >
+                  {({ id, describedBy, invalid }) => (
+                    <Input
+                      id={id}
+                      name="confirmPassword"
+                      type="password"
+                      value={f.values.confirmPassword}
+                      onChange={f.handleChange}
+                      onBlur={f.handleBlur}
+                      placeholder="••••••••"
+                      state={invalid ? "error" : "default"}
+                      aria-invalid={invalid}
+                      aria-describedby={describedBy}
+                      disabled={disabled}
+                      autoComplete="new-password"
                     />
                   )}
                 </FormField>
               </div>
 
               <div className="flex items-center gap-3">
-                <Button
-                  type="submit"
-                  variant="default"
-                  shadow="sm"
-                  shape="lg"
-                  disabled={disabled}
-                >
-                  {disabled ? t("auth.signingIn") : t("auth.signIn")}
+                <Button type="submit" variant="default" shadow="sm" shape="lg" disabled={disabled}>
+                  {disabled ? t("auth.creatingAccount") : t("auth.createAccount")}
                 </Button>
               </div>
 
-              <div className="text-xs text-muted-foreground">
-                {t("auth.tipGoogle")}
-              </div>
+              <div className="text-xs text-muted-foreground">{t("auth.passwordHint")}</div>
             </form>
           );
         }}
