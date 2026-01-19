@@ -1,4 +1,10 @@
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 
 import { db } from "src/shared/config/firebase/firebase";
@@ -37,10 +43,9 @@ export function useJobs(userId?: string | null): UseJobsResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-
     if (!userId) return;
 
-    setIsLoading(true);
+    queueMicrotask(() => setIsLoading(true));
 
     const q = query(
       collection(db, "jobs"),
@@ -52,8 +57,8 @@ export function useJobs(userId?: string | null): UseJobsResult {
       q,
       (snap) => {
         setJobs(snap.docs.map((d) => toJob(d.id, d.data())));
-        setError(null);
         setIsLoading(false);
+        setError(null);
       },
       (e) => {
         setError(e.message ?? "Failed to load jobs");

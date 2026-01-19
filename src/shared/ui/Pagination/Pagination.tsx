@@ -81,7 +81,10 @@ export function Pagination({
       <div className="flex flex-wrap items-center gap-1">
         {pages.map((p, idx) =>
           p === "..." ? (
-            <span key={`dots-${idx}`} className="px-2 text-xs text-muted-foreground">
+            <span
+              key={`dots-${idx}`}
+              className="px-2 text-xs text-muted-foreground"
+            >
               …
             </span>
           ) : (
@@ -92,6 +95,7 @@ export function Pagination({
               shape="pill"
               onClick={() => onPageChange(p)}
               disabled={disabled}
+              className="shrink-0 min-w-9 justify-center"
             >
               {p}
             </Button>

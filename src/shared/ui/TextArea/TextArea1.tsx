@@ -6,7 +6,7 @@ export type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & 
   state?: "default" | "error";
 };
 
-export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+export const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, state = "default", ...props }, ref) => {
     return (
       <textarea
@@ -23,4 +23,4 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   }
 );
 
-Textarea.displayName = "Textarea";
+TextArea.displayName = "TextArea";

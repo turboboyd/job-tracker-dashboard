@@ -1,15 +1,31 @@
 .theme-light {
-  --background: 248 250 252; /* slate-50 */
-  --foreground: 15 23 42;    /* slate-900 */
+  /* Base */
+  --background: 243 246 250;   /* мягкий серо-голубой */
+  --foreground: 15 23 42;      /* slate-900 */
 
-  --card: 255 255 255;
+  /* Surfaces */
+  --card: 255 255 255;         /* чисто белые карточки */
   --card-foreground: 15 23 42;
 
-  --primary: 15 23 42;
+  /* Primary (actions, active) */
+  --primary: 30 41 59;
   --primary-foreground: 248 250 252;
 
-  --muted: 241 245 249;
-  --muted-foreground: 100 116 139;
+  /* Muted (UI chrome, hover, sidebar bg) */
+  --muted: 232 237 243;        /* важный цвет */
+  --muted-foreground: 71 85 105;
 
-  --border: 226 232 240;
+  /* Borders */
+  --border: 220 226 234;       /* мягче, не режет */
+
+  /* Inputs */
+  --input: 235 239 245;
+
+  /* Accent (hover, active sidebar item) */
+  --accent: 226 232 240;
+  --accent-foreground: 15 23 42;
+
+  /* Destructive */
+  --destructive: 220 38 38;
+  --destructive-foreground: 248 250 252;
 }

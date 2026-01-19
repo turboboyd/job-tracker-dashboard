@@ -16,6 +16,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
+          "border border-transparent",
           "bg-primary text-primary-foreground",
           "hover:opacity-90",
         ].join(" "),
