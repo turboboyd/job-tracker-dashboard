@@ -1,1 +1,1 @@
-export type { Match } from "./model/types";
+export type { TypeMatch } from "./model/types";

@@ -20,8 +20,8 @@ export type MultiSelectDropdownProps<T extends string> = {
   options: Array<MultiSelectOption<T>>;
 
   placeholder?: string;
-  clearLabel?: string; // текст кнопки сброса внутри дропдауна
-  searchable?: boolean; // поиск по опциям внутри дропдауна
+  clearLabel?: string; 
+  searchable?: boolean; 
   maxSelected?: number;
 
   disabled?: boolean;
@@ -43,31 +43,6 @@ function toggle<T extends string>(arr: T[], v: T): T[] {
   return arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
 }
 
-// function useClickOutside(
-//   refs: Array<React.RefObject<HTMLElement>>,
-//   onOutside: () => void,
-//   active: boolean
-// ) {
-//   React.useEffect(() => {
-//     if (!active) return;
-
-//     const onDown = (e: MouseEvent | TouchEvent) => {
-//       const target = e.target as Node | null;
-//       if (!target) return;
-
-//       const inside = refs.some((r) => r.current && r.current.contains(target));
-//       if (!inside) onOutside();
-//     };
-
-//     document.addEventListener("mousedown", onDown);
-//     document.addEventListener("touchstart", onDown);
-
-//     return () => {
-//       document.removeEventListener("mousedown", onDown);
-//       document.removeEventListener("touchstart", onDown);
-//     };
-//   }, [active, onOutside, refs]);
-// }
 
 function CheckIcon() {
   return (

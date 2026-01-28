@@ -1,6 +1,6 @@
 import { cmpStr } from "../../lib/compare";
 import { norm } from "../../lib/normalize";
-import type { Match, MatchesFiltersState, MatchSortKey } from "../types";
+import type { TypeMatch, MatchesFiltersState, MatchSortKey } from "../types";
 
 function toTime(v: unknown): number {
   const d = typeof v === "string" || v instanceof Date ? new Date(v) : null;
@@ -12,9 +12,9 @@ function toTime(v: unknown): number {
 type FilterStatus = MatchesFiltersState["statuses"][number];
 
 export function applyMatchesFilters(
-  matches: Match[],
+  matches: TypeMatch[],
   filters: MatchesFiltersState
-): Match[] {
+): TypeMatch[] {
   const q = norm(filters.q);
 
   const loopSet = filters.loopIds.length ? new Set(filters.loopIds) : null;
@@ -48,9 +48,9 @@ export function applyMatchesFilters(
 }
 
 export function applyMatchesSort(
-  list: Match[],
+  list: TypeMatch[],
   sort: MatchSortKey
-): Match[] {
+): TypeMatch[] {
   const arr = [...list];
 
   if (sort === "matchedAtDesc")
@@ -66,9 +66,9 @@ export function applyMatchesSort(
 }
 
 export function selectVisibleMatches(
-  matches: Match[],
+  matches: TypeMatch[],
   filters: MatchesFiltersState
-): Match[] {
+): TypeMatch[] {
   const filtered = applyMatchesFilters(matches, filters);
   return applyMatchesSort(filtered, filters.sort);
 }

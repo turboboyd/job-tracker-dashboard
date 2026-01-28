@@ -7,18 +7,35 @@ const pageShellVariants = cva("w-full", {
   variants: {
     paddingX: {
       none: "px-0",
-      sm: "px-4",     
-      md: "px-6",     
+      sm: "px-4",
+      md: "px-6",
     },
     paddingY: {
       none: "py-0",
       sm: "py-4",
       md: "py-6",
     },
+
+    fullHeight: {
+      false: "",
+      true: "h-full min-h-0",
+    },
+    layout: {
+      block: "",
+      flexCol: "flex flex-col",
+    },
+    overflow: {
+      visible: "",
+      hidden: "overflow-hidden",
+    },
   },
+
   defaultVariants: {
     paddingX: "md",
     paddingY: "sm",
+    fullHeight: false,
+    layout: "block",
+    overflow: "visible",
   },
 });
 
@@ -27,10 +44,16 @@ export interface PageShellProps
     VariantProps<typeof pageShellVariants> {}
 
 export const PageShell = React.forwardRef<HTMLDivElement, PageShellProps>(
-  ({ className, paddingX, paddingY, ...props }, ref) => (
+  (
+    { className, paddingX, paddingY, fullHeight, layout, overflow, ...props },
+    ref
+  ) => (
     <div
       ref={ref}
-      className={classNames(pageShellVariants({ paddingX, paddingY }), className)}
+      className={classNames(
+        pageShellVariants({ paddingX, paddingY, fullHeight, layout, overflow }),
+        className
+      )}
       {...props}
     />
   )

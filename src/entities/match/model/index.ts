@@ -1,4 +1,4 @@
-export type { Match, MatchesFiltersState, MatchSortKey } from "./types";
+export type { TypeMatch, MatchesFiltersState, MatchSortKey } from "./types";
 export { defaults as matchesFiltersDefaults } from "./types";
 
 export { applyMatchesFilters, applyMatchesSort, selectVisibleMatches } from "./filters/apply";

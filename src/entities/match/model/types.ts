@@ -17,7 +17,7 @@ export type MatchesFiltersState = {
   showAdvanced: boolean;
 };
 
-export type Match = {
+export type TypeMatch = {
   id: string;
 
   userId: string;

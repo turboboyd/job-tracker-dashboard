@@ -1,9 +1,9 @@
 import React from "react";
 
-import type { Match, MatchesFiltersState } from "src/entities/match/model";
+import type { TypeMatch, MatchesFiltersState } from "src/entities/match/model";
 import { matchesFiltersDefaults, selectVisibleMatches } from "src/entities/match/model";
 
-export function useMatchesPage(args: { matches: Match[] }) {
+export function useMatchesPage(args: { matches: TypeMatch[] }) {
   const { matches } = args;
 
   const [filters, setFilters] = React.useState<MatchesFiltersState>(matchesFiltersDefaults);
