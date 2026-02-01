@@ -1,24 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
-import { useAuth } from "src/shared/lib";
+import { useAuthActions, useAuthSelectors } from "src/app/store/auth";
 import { Button } from "src/shared/ui";
-
 
 export type LogoutButtonProps = {
   className?: string;
 };
 
 export const LogoutButton: React.FC<LogoutButtonProps> = ({ className }) => {
-  const { signOut } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
+  const { signOut } = useAuthActions();
+  const { isLoading } = useAuthSelectors();
 
   const onLogout = async () => {
-    setIsLoading(true);
-    try {
-      await signOut();
-    } finally {
-      setIsLoading(false);
-    }
+    await signOut();
   };
 
   return (
@@ -29,7 +25,7 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({ className }) => {
       onClick={onLogout}
       disabled={isLoading}
     >
-      {isLoading ? "Выход..." : "Logout"}
+      {isLoading ? t("auth.logout.signingOut") : t("auth.logout.logout")}
     </Button>
   );
 };

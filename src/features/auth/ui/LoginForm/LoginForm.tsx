@@ -1,105 +1,54 @@
 import { Formik } from "formik";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import * as Yup from "yup";
 
-import { normalizeError, useAuth } from "src/shared/lib";
-import { Button, InlineError, FormikInputField } from "src/shared/ui";
+import { useAuthActions, useAuthSelectors } from "src/app/store/auth";
+import { InlineError, FormikInputField } from "src/shared/ui";
 
-import { GoogleSignInButton } from "../GoogleSignInButton/GoogleSignInButton";
+import { mapFirebaseAuthError } from "../../lib/firebaseAuthErrors";
+import { createLoginSchema, type LoginValues } from "../../model/validation";
+import { AuthFormShell } from "../AuthFormShell";
+import { AuthSubmitButton } from "../AuthSubmitButton";
 
 export type LoginFormProps = {
   onSuccess: (from: string) => void;
 };
 
-type LoginValues = {
-  email: string;
-  password: string;
+const initialValues: LoginValues = { email: "", password: "" };
+
+const LOGIN_ERROR_OVERRIDES: Record<string, string> = {
+  "auth/invalid-credential": "auth.errors.wrongPassword",
+  "auth/wrong-password": "auth.errors.wrongPassword",
+  "auth/user-not-found": "auth.errors.userNotFound",
 };
-
-type FirebaseAuthError = {
-  code?: string;
-  message?: string;
-};
-
-function mapFirebaseAuthError(e: unknown, t: (key: string) => string): string {
-  if (typeof e === "object" && e !== null) {
-    const err = e as FirebaseAuthError;
-    switch (err.code) {
-      case "auth/invalid-email":
-        return t("auth.errors.invalidEmail");
-      case "auth/invalid-credential":
-      case "auth/wrong-password":
-        return t("auth.errors.wrongPassword");
-      case "auth/user-not-found":
-        return t("auth.errors.userNotFound");
-      case "auth/too-many-requests":
-        return t("auth.errors.tooManyRequests");
-      case "auth/network-request-failed":
-        return t("auth.errors.network");
-      default:
-        if (typeof err.message === "string" && err.message.trim().length > 0) {
-          return err.message;
-        }
-        break;
-    }
-  }
-
-  return normalizeError(e);
-}
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const { t } = useTranslation();
-  const { signInWithEmail } = useAuth();
 
-  const initialValues = useMemo<LoginValues>(() => ({ email: "", password: "" }), []);
+  const { signInWithEmail, clearAuthError } = useAuthActions();
+  const { isLoading, error } = useAuthSelectors();
 
-  const schema = useMemo<Yup.ObjectSchema<LoginValues>>(
-    () =>
-      Yup.object({
-        email: Yup.string()
-          .trim()
-          .email(t("auth.validation.emailInvalid"))
-          .required(t("auth.validation.emailRequired")),
-        password: Yup.string()
-          .min(6, t("auth.validation.passwordMin"))
-          .required(t("auth.validation.passwordRequired")),
-      }),
-    [t]
-  );
+  const schema = useMemo(() => createLoginSchema(t), [t]);
 
   return (
-    <div className="space-y-4">
-      <GoogleSignInButton onSuccess={(from) => onSuccess(from)} onError={() => {}} />
-
-      <div className="relative py-1">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-card px-2 text-xs text-muted-foreground">{t("auth.or")}</span>
-        </div>
-      </div>
-
+    <AuthFormShell googleButtonProps={{ onSuccess }}>
       <Formik<LoginValues>
         initialValues={initialValues}
         validationSchema={schema}
         validateOnBlur
         validateOnChange={false}
-        onSubmit={async (values, helpers) => {
-          helpers.setStatus(undefined);
-
-          try {
-            await signInWithEmail(values.email.trim(), values.password);
-            onSuccess("");
-          } catch (e) {
-            helpers.setStatus(mapFirebaseAuthError(e, t));
-          }
+        onSubmit={async (values) => {
+          clearAuthError();
+          await signInWithEmail(values.email.trim(), values.password);
+          onSuccess("");
         }}
       >
         {(f) => {
-          const commonError = typeof f.status === "string" ? f.status : undefined;
-          const disabled = f.isSubmitting;
+          const commonError = error
+            ? mapFirebaseAuthError(error, t, LOGIN_ERROR_OVERRIDES)
+            : undefined;
+
+          const disabled = f.isSubmitting || isLoading;
 
           return (
             <form onSubmit={f.handleSubmit} className="space-y-4">
@@ -115,6 +64,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                   autoComplete="email"
                   inputMode="email"
                   disabled={disabled}
+                  onFocus={() => clearAuthError()}
                 />
 
                 <FormikInputField
@@ -126,25 +76,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                   placeholder="••••••••"
                   autoComplete="current-password"
                   disabled={disabled}
+                  onFocus={() => clearAuthError()}
                 />
               </div>
 
-              <div className="flex flex-col gap-3">
-                <Button
-                  type="submit"
-                  variant="default"
-                  shadow="sm"
-                  shape="lg"
-                  disabled={disabled}
-                  className="w-full"
-                >
-                  {disabled ? t("auth.signingIn") : t("auth.signIn")}
-                </Button>
-              </div>
+              <AuthSubmitButton
+                disabled={disabled}
+                isSubmitting={disabled}
+                idleText={t("auth.signIn")}
+                submittingText={t("auth.signingIn")}
+              />
             </form>
           );
         }}
       </Formik>
-    </div>
+    </AuthFormShell>
   );
 };
