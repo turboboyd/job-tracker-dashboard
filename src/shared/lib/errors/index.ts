@@ -1,1 +1,1 @@
-export * from './normalizeError';
+export { getErrorMessage } from "./getErrorMessage";

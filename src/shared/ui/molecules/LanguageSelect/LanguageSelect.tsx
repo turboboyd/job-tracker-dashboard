@@ -1,37 +1,77 @@
-import React from "react";
-import { useTranslation } from "react-i18next";
+import React, { useMemo } from "react";
 
-const LANGS = [
-  { code: "en", label: "EN" },
-  { code: "ru", label: "RU" },
-  { code: "de", label: "DE" },
-  { code: "uk", label: "UK" },
-] as const;
+import type { SupportedLng } from "src/shared/config/i18n/i18n";
+import { Select, type SelectOption } from "src/shared/ui/Form/Select/Select";
 
-export const LanguageSelect: React.FC = () => {
-  const { i18n } = useTranslation();
+import { LANGUAGES } from "./languages";
+
+export type LanguageLabelMode = "short" | "full";
+
+export type LanguageItem<L extends string> = {
+  code: L;
+  shortLabel: string;
+  fullLabel: string;
+  disabled?: boolean;
+};
+
+export type LanguageSelectProps<L extends string> = {
+  labelMode?: LanguageLabelMode;
+
+  /** Текущее значение (controlled) */
+  value: L;
+
+  /** onChange для controlled компонента */
+  onChange: (next: L) => void;
+
+  disabled?: boolean;
+  className?: string;
+
+  size?: "sm" | "md" | "lg";
+  radius?: "md" | "lg" | "xl";
+  width?: "full" | "auto";
+  intent?: "default" | "error" | "success" | "warning";
+  shadow?: "none" | "sm" | "md";
+
+  placeholder?: React.ReactNode;
+};
+
+export function LanguageSelect({
+  labelMode = "short",
+  value,
+  onChange,
+  disabled,
+  className,
+  size,
+  radius,
+  width,
+  intent,
+  shadow,
+  placeholder,
+}: LanguageSelectProps<SupportedLng>) {
+  const options: Array<SelectOption<SupportedLng>> = useMemo(
+    () =>
+      LANGUAGES.map((l) => ({
+        value: l.code,
+        label: labelMode === "short" ? l.shortLabel : l.fullLabel,
+        disabled: l.disabled,
+      })),
+    [labelMode],
+  );
 
   return (
-    <select
-      value={i18n.language?.slice(0, 2) ?? "en"}
-      onChange={(e) => i18n.changeLanguage(e.target.value)}
-      className={[
-        "h-9 rounded-md border border-border bg-card",
-        "px-md text-sm text-foreground",
-        "shadow-sm",
-        "transition-colors duration-fast ease-ease-out",
-        "hover:bg-muted",
-        "outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring",
-        "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-      ].join(" ")}
+    <Select<SupportedLng>
+      value={value}
+      onChange={onChange}
+      options={options}
+      disabled={disabled}
+      className={className}
+      size={size}
+      radius={radius}
+      width={width}
+      intent={intent}
+      shadow={shadow}
+      placeholderOption={placeholder}
       aria-label="Select language"
-    >
-      {LANGS.map((l) => (
-        <option key={l.code} value={l.code}>
-          {l.label}
-        </option>
-      ))}
-    </select>
+    />
   );
-};
+}

@@ -82,7 +82,7 @@ export type SelectProps<T extends string> = Omit<
   VariantProps<typeof selectVariants> & {
     value: T;
     onChange: (next: T) => void;
-    options: Array<SelectOption<T>>;
+    options: ReadonlyArray<SelectOption<T>>;
     state?: SelectStateLegacy;
     placeholderOption?: React.ReactNode;
   };
