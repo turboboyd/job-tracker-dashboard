@@ -1,121 +1,74 @@
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import React from "react";
 
-import { labelStatus } from "src/entities/loop/lib";
-import type { TypeMatch } from "src/entities/match/model/types";
-import { MatchDetailsModal } from "src/entities/match/ui/matchCard/MatchDetailsModal";
-import {
-  formatMatchedAt,
-  normalizePlatform,
-} from "src/entities/match/ui/matchCard/matchFormat";
+import type { LoopMatch } from "src/entities/loopMatch";
 import { classNames } from "src/shared/lib";
-import { Card } from "src/shared/ui";
 
-import { setDragPayload } from "../model/dnd";
-import type { BoardDragPayload } from "../model/types";
+import { BoardMatchCardView } from "./BoardMatchCardView";
 
-export function BoardMatchCard({
-  match,
-  loopName,
-  busy,
-  onDelete,
-  index,
-}: {
-  match: TypeMatch;
+type Props = Readonly<{
+  match: LoopMatch;
   loopName: string;
   busy: boolean;
-  onDelete: (matchId: string) => void;
+  onDelete: (matchId: LoopMatch["id"]) => void | Promise<void>;
   index: number;
-}) {
-  const [open, setOpen] = React.useState(false);
+  overlay?: boolean;
+}>;
 
-  const matchedAt = React.useMemo(
-    () => formatMatchedAt(match.matchedAt),
-    [match.matchedAt]
-  );
+export function BoardMatchCard({ match, loopName, busy, onDelete, index }: Props) {
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
+    useSortable({
+      id: match.id,
+      disabled: busy,
+      data: {
+        matchId: match.id,
+        status: match.status,
+        index,
+      },
+    });
 
-  const platform = React.useMemo(() => {
-    const p = normalizePlatform(match.platform);
-    return p ? p.toUpperCase() : "";
-  }, [match.platform]);
-
-  const meta = React.useMemo(() => {
-    const parts = [match.location, platform, matchedAt, loopName]
-      .map((v) => String(v ?? "").trim())
-      .filter(Boolean);
-    return parts.join(" • ");
-  }, [match.location, platform, matchedAt, loopName]);
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.25 : 1,
+  };
 
   return (
-    <>
-      <div
-        draggable={!busy}
-        onDragStart={(e: React.DragEvent<HTMLDivElement>) => {
-          const payload: BoardDragPayload = {
-            matchId: match.id,
-            fromStatus: match.status,
-            fromIndex: index,
-          };
-          setDragPayload(e.dataTransfer, payload);
-          e.dataTransfer.effectAllowed = "move";
-        }}
-        role="button"
-        tabIndex={0}
-        onClick={() => setOpen(true)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setOpen(true);
-        }}
-        className={classNames(
-          "rounded-xl outline-none",
-          busy
-            ? "opacity-60 cursor-not-allowed"
-            : "cursor-grab active:cursor-grabbing",
-          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        )}
-      >
-        <Card
-          variant="default"
-          padding="md"
-          shadow="sm"
-          interactive
-          className={classNames(
-            "flex flex-col gap-sm",
-            "transition-[box-shadow,transform] duration-fast ease-ease-out",
-            !busy && "hover:shadow-md hover:-translate-y-[1px]"
-          )}
-        >
-          <div className="min-w-0">
-            <div className="min-w-0 whitespace-nowrap overflow-hidden text-ellipsis text-sm">
-              <span className="font-semibold text-foreground">
-                {match.title || "—"}
-              </span>
-              <span className="ml-2 text-muted-foreground">
-                {match.company || "—"}
-              </span>
-            </div>
-
-            {meta ? (
-              <div className="mt-1 text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
-                {meta}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {labelStatus(match.status)}
-            </span>
-          </div>
-        </Card>
-      </div>
-
-      <MatchDetailsModal
-        open={open}
-        onOpenChange={setOpen}
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={classNames("touch-none select-none", isDragging && "z-10")}
+      {...attributes}
+      {...listeners}
+    >
+      <BoardMatchCardView
         match={match}
         loopName={loopName}
         busy={busy}
         onDelete={onDelete}
+        overlay={false}
       />
-    </>
+    </div>
+  );
+}
+
+
+export function BoardMatchCardOverlay({
+  match,
+  loopName,
+  busy,
+  onDelete,
+}: Omit<Props, "index">) {
+  return (
+    <div className="rotate-[1deg]">
+      <BoardMatchCardView
+        match={match}
+        loopName={loopName}
+        busy={busy}
+        onDelete={onDelete}
+        overlay
+      />
+    </div>
   );
 }

@@ -1,41 +1,39 @@
-import type { LoopMatchStatus } from "src/entities/loop/model/types";
-import type { TypeMatch } from "src/entities/match/model/types";
+import type { LoopMatch, LoopMatchStatus } from "src/entities/loopMatch";
 
 export const BOARD_DND_MIME = "application/x-match";
 
-export type BoardDragPayload = {
+export type BoardDragPayload = Readonly<{
   matchId: string;
   fromStatus: LoopMatchStatus;
   fromIndex: number;
-};
+}>;
 
 export type BoardOrderByStatus = Record<LoopMatchStatus, string[]>;
+
+
+export type BoardMatchesQueryState = Readonly<{
+  isLoading: boolean;
+  isError: boolean;
+  error?: unknown;
+}>;
 
 export interface BoardVM {
   busy: boolean;
 
   queries: {
-    matchesQ: {
-      isLoading: boolean;
-      isError: boolean;
-      error?: unknown;
-    };
+    matchesQ: BoardMatchesQueryState;
   };
 
   data: {
-    matches: TypeMatch[];
-    byStatus: Map<LoopMatchStatus, TypeMatch[]>;
-    loopIdToName: Map<string, string>;
+    matches: readonly LoopMatch[];
+    byStatus: ReadonlyMap<LoopMatchStatus, readonly LoopMatch[]>;
+    loopIdToName: ReadonlyMap<string, string>;
   };
 
   actions: {
     onDelete: (matchId: string) => void;
     onDropToStatus: (
-      payload: {
-        matchId: string;
-        fromStatus: LoopMatchStatus;
-        fromIndex: number;
-      },
+      payload: BoardDragPayload,
       toStatus: LoopMatchStatus,
       toIndex: number
     ) => Promise<void>;

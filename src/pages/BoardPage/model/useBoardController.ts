@@ -1,122 +1,93 @@
 import React from "react";
 
-import { LOOP_MATCH_STATUSES } from "src/entities/loop/model/constants";
-import type { LoopMatchStatus } from "src/entities/loop/model/types";
-import type { TypeMatch } from "src/entities/match/model/types";
-import { useMatchesDerived } from "src/pages/MatchesPage/model/useMatchesDerived";
-import { useMatchesMutations } from "src/pages/MatchesPage/model/useMatchesMutations";
-import { useMatchesQueries } from "src/pages/MatchesPage/model/useMatchesQueries";
-import { useAuth } from "src/shared/lib";
+import { useAuthSelectors } from "src/entities/auth";
+import { LOOP_MATCH_STATUSES } from "src/entities/loop";
+import type { LoopMatch, LoopMatchStatus } from "src/entities/loopMatch";
 
-import {
-  loadOrder,
-  saveOrder,
-  ensureIdsExist,
-  sortByOrder,
-  createEmptyOrder,
-} from "./order";
-import type { BoardVM, BoardDragPayload, BoardOrderByStatus } from "./types";
+import { groupMatchesByStatus } from "./grouping";
+import { sortByOrder } from "./order";
+import type { BoardDragPayload, BoardVM } from "./types";
+import { useBoardMutations, fireAndForgetMutation } from "./useBoardMutations";
+import { useBoardOrderState } from "./useBoardOrderState";
+import { useBoardQueries } from "./useBoardQueries";
 
-function groupByStatus(matches: TypeMatch[]) {
-  const map = new Map<LoopMatchStatus, TypeMatch[]>();
-  for (const s of LOOP_MATCH_STATUSES) map.set(s.value, []);
-  for (const m of matches) (map.get(m.status) ?? []).push(m);
+function buildLoopIdToName(loops: ReadonlyArray<{ id: string; name: string }>): ReadonlyMap<string, string> {
+  const map = new Map<string, string>();
+  for (const l of loops) map.set(l.id, l.name);
   return map;
 }
 
+function findMatchById(matches: readonly LoopMatch[], matchId: string): LoopMatch | undefined {
+  return matches.find((m) => m.id === matchId);
+}
+
+function buildBoardColumns(
+  matches: readonly LoopMatch[],
+  orderByStatus: Record<LoopMatchStatus, string[]>,
+): ReadonlyMap<LoopMatchStatus, readonly LoopMatch[]> {
+  const grouped = groupMatchesByStatus(matches);
+
+
+  for (const s of LOOP_MATCH_STATUSES) {
+    const status = s.value;
+    const list = grouped.get(status) ?? [];
+    const ordered = sortByOrder(list, orderByStatus[status] ?? []);
+    grouped.set(status, ordered);
+  }
+
+  return grouped as ReadonlyMap<LoopMatchStatus, readonly LoopMatch[]>;
+}
+
 export function useBoardController(): BoardVM {
-  const { user } = useAuth();
-  const userId = user?.uid ?? null;
+  const { userId } = useAuthSelectors();
 
-  const { matchesQ, matches, loops } = useMatchesQueries(userId);
-  const { busy, actions } = useMatchesMutations(userId);
-  const { loopIdToName } = useMatchesDerived(matches, loops);
 
-  const [orderByStatus, setOrderByStatus] = React.useState<BoardOrderByStatus>(
-    () => {
-      if (!userId) return createEmptyOrder();
-      return loadOrder(userId);
-    }
+  const { loops, matches, matchesQ } = useBoardQueries();
+  const loopIdToName = React.useMemo(() => buildLoopIdToName(loops), [loops]);
+
+
+  const { orderByStatus, applyDrop } = useBoardOrderState({ userId, matches });
+
+
+  const { busy, onDeleteById, updateStatus } = useBoardMutations();
+
+
+  const byStatus = React.useMemo(
+    () => buildBoardColumns(matches, orderByStatus),
+    [matches, orderByStatus],
   );
 
-  React.useEffect(() => {
-    if (!userId) return;
-    setOrderByStatus(loadOrder(userId));
-  }, [userId]);
 
-  React.useEffect(() => {
-    if (!userId) return;
-
-    setOrderByStatus((prev) => {
-      const next = { ...prev };
-      ensureIdsExist(next, matches as TypeMatch[]);
-      saveOrder(userId, next);
-      return next;
-    });
-  }, [userId, matches]);
-
-  const byStatus = React.useMemo(() => {
-    const grouped = groupByStatus(matches as TypeMatch[]);
-
-    for (const s of LOOP_MATCH_STATUSES) {
-      const list = grouped.get(s.value) ?? [];
-      const ordered = sortByOrder(list, orderByStatus[s.value] ?? []);
-      grouped.set(s.value, ordered);
-    }
-
-    return grouped;
-  }, [matches, orderByStatus]);
+  const onDelete = React.useCallback(
+    (matchId: string) => {
+      fireAndForgetMutation(onDeleteById(matches, matchId));
+    },
+    [matches, onDeleteById],
+  );
 
   const onDropToStatus = React.useCallback(
-    async (
-      payload: BoardDragPayload,
-      toStatus: LoopMatchStatus,
-      toIndex: number
-    ) => {
+    async (payload: BoardDragPayload, toStatus: LoopMatchStatus, toIndex: number) => {
       if (!userId) return;
       if (busy) return;
 
-      setOrderByStatus((prev) => {
-        const next: BoardOrderByStatus = { ...prev };
 
-        const fromArr = [...(next[payload.fromStatus] ?? [])];
-        const toArr =
-          payload.fromStatus === toStatus
-            ? fromArr
-            : [...(next[toStatus] ?? [])];
+      applyDrop(payload, toStatus, toIndex);
 
-        const currentFromIndex = fromArr.indexOf(payload.matchId);
-        if (currentFromIndex !== -1) fromArr.splice(currentFromIndex, 1);
 
-        const safeIndex = Math.max(0, Math.min(toIndex, toArr.length));
-        toArr.splice(safeIndex, 0, payload.matchId);
+      if (payload.fromStatus === toStatus) return;
 
-        next[payload.fromStatus] =
-          payload.fromStatus === toStatus ? toArr : fromArr;
-        next[toStatus] = toArr;
+      const match = findMatchById(matches, payload.matchId);
+      if (!match) return;
 
-        saveOrder(userId, next);
-        return next;
-      });
-
-      if (payload.fromStatus !== toStatus) {
-        await actions.onUpdateStatus(payload.matchId, toStatus);
-      }
+      await updateStatus({ matchId: match.id, loopId: match.loopId, status: toStatus });
     },
-    [actions, busy, userId]
+    [applyDrop, busy, matches, updateStatus, userId],
   );
 
   return {
     busy,
     queries: { matchesQ },
-    data: {
-      matches,
-      byStatus,
-      loopIdToName,
-    },
-    actions: {
-      onDelete: actions.onDelete,
-      onDropToStatus,
-    },
+    data: { matches, byStatus, loopIdToName },
+    actions: { onDelete, onDropToStatus },
   };
 }
