@@ -9,6 +9,8 @@ type Props = {
   title: string;
   onGo: () => void;
   done?: boolean;
+  goText?: string;
+  doneText?: string;
   className?: string;
   iconShake?: boolean;
   onGoHoverChange?: (hovered: boolean) => void;
@@ -19,6 +21,8 @@ export function ActionRow({
   title,
   onGo,
   done = false,
+  goText,
+  doneText,
   className,
   iconShake = false,
   onGoHoverChange,
@@ -98,7 +102,7 @@ export function ActionRow({
           else setLocalHover(false);
         }}
       >
-        {done ? "Done" : "Go"}
+        {done ? (doneText ?? "Done") : (goText ?? "Go")}
       </Button>
     </Card>
   );

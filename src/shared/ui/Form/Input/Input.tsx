@@ -18,8 +18,6 @@ import { InputControl, SearchLeftSlot, type InputControlProps } from "./InputCon
 export type InputStateLegacy = "default" | "error";
 
 /** @deprecated используйте intent */
-export type InputState = InputStateLegacy;
-
 /**
  * Готовые пресеты: задают варианты (size/padding/radius/shadow/intent) и поведение.
  */

@@ -1,4 +1,4 @@
-import { useTheme } from "src/app/providers/ThemeProvider";
+import { useTheme } from "src/shared/lib/theme";
 import { Button } from "src/shared/ui";
 
 export function ThemeToggle() {

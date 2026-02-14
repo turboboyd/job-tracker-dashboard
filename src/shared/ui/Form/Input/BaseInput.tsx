@@ -14,8 +14,9 @@ export type InputIntent = "default" | "error" | "success" | "warning";
 export const baseInputVariants = cva(
   [
     "block",
-    "bg-background text-foreground",
+    "bg-input text-foreground",
     "border border-input",
+    "hover:border-border",
     "placeholder:text-muted-foreground",
     "outline-none",
     "transition-colors duration-fast ease-ease-out",
@@ -55,8 +56,8 @@ export const baseInputVariants = cva(
       intent: {
         default: "",
         error: "border-destructive focus-visible:ring-destructive",
-        success: "border-emerald-500/60 focus-visible:ring-emerald-500/60",
-        warning: "border-amber-500/60 focus-visible:ring-amber-500/60",
+        success: "border-success-foreground/40 focus-visible:ring-success-foreground/40",
+        warning: "border-warning-foreground/40 focus-visible:ring-warning-foreground/40",
       },
 
       shadow: {

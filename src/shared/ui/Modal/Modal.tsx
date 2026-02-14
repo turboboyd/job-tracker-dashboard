@@ -1,5 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 import { classNames } from "src/shared/lib";
 import { Button } from "src/shared/ui";
@@ -32,13 +33,15 @@ export function Modal({
   size = "md",
   showClose = true,
 }: ModalProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay
           className={classNames(
             "fixed inset-0 z-modal",
-            "bg-black/50 backdrop-blur-sm",
+            "bg-foreground/50 backdrop-blur-sm",
             "transition-opacity duration-normal ease-ease-out",
             "data-[state=open]:opacity-100 data-[state=closed]:opacity-0"
           )}
@@ -90,9 +93,9 @@ export function Modal({
                   "hover:bg-muted",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 )}
-                aria-label="Close"
+                aria-label={t("common.close", "Close")}
               >
-                Close
+                {t("common.close", "Close")}
               </Button>
             </Dialog.Close>
           ) : null}

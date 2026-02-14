@@ -13,11 +13,13 @@ export type TextAreaStateLegacy = "default" | "error";
 const textAreaVariants = cva(
   [
     "block w-full",
-    "bg-background text-foreground",
+    "bg-input text-foreground",
     "border border-input",
+    "hover:border-border",
     "placeholder:text-muted-foreground",
     "outline-none",
     "transition-colors duration-fast ease-ease-out",
+    "transition-shadow duration-normal ease-ease-out",
     "focus-visible:ring-2 focus-visible:ring-ring",
     "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50",
@@ -38,13 +40,12 @@ const textAreaVariants = cva(
       intent: {
         default: "",
         error: "border-destructive focus-visible:ring-destructive",
-        success: "border-emerald-500/60 focus-visible:ring-emerald-500/60",
-        warning: "border-amber-500/60 focus-visible:ring-amber-500/60",
+        success: "border-success-foreground/40 focus-visible:ring-success-foreground/40",
+        warning: "border-warning-foreground/40 focus-visible:ring-warning-foreground/40",
       },
       shadow: {
         none: "shadow-none",
-        sm: "shadow-sm",
-        md: "shadow-md",
+        sm: "shadow-sm hover:shadow-md",        md: "shadow-md hover:shadow-lg",
       },
       resize: {
         none: "resize-none",

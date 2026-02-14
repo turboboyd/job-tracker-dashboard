@@ -51,9 +51,9 @@ const sizes: Record<LinkButtonSize, string> = {
 };
 
 const variants: Record<LinkButtonVariant, string> = {
-  default: "bg-primary text-primary-foreground hover:opacity-90",
-  outline: "border border-border bg-background text-foreground hover:bg-muted",
-  ghost: "bg-transparent text-foreground hover:bg-muted",
+  default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-md active:shadow-sm",
+  outline: "border border-border bg-card text-foreground hover:bg-muted/60 hover:shadow-md active:shadow-sm",
+  ghost: "bg-transparent text-foreground hover:bg-muted/60 active:bg-muted/80",
   text: "bg-transparent text-foreground px-0 h-auto hover:underline",
 };
 

@@ -9,6 +9,8 @@ const buttonVariants = cva(
     "inline-flex items-center justify-center whitespace-nowrap",
     "text-sm font-medium",
     "transition-colors duration-fast ease-ease-out",
+    "transition-shadow duration-normal ease-ease-out",
+    "active:translate-y-px",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50",
     "select-none",
@@ -19,14 +21,18 @@ const buttonVariants = cva(
         default: [
           "border border-transparent",
           "bg-primary text-primary-foreground",
-          "hover:opacity-90",
+          "hover:bg-primary/90",
+          "hover:shadow-md",
+          "active:shadow-sm",
         ].join(" "),
-        secondary: ["bg-muted text-foreground", "hover:opacity-90"].join(" "),
+        secondary: ["bg-secondary text-secondary-foreground", "hover:bg-secondary/80", "hover:shadow-md", "active:shadow-sm"].join(" "),
         outline: [
           "border border-border bg-card text-foreground",
-          "hover:bg-muted",
+          "hover:bg-muted/60",
+          "hover:shadow-md",
+          "active:shadow-sm",
         ].join(" "),
-        ghost: "text-foreground hover:bg-muted",
+        ghost: "text-foreground hover:bg-muted/60 active:bg-muted/80",
         link: "underline-offset-4 hover:underline text-primary",
       },
 
@@ -75,7 +81,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
       shape: "md",
-      shadow: "none",
+      shadow: "sm",
     },
   }
 );

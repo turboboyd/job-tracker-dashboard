@@ -16,7 +16,6 @@ export type {
   InputProps,
   InputPreset,
   InputStateLegacy,
-  InputState,
 } from "./Input";
 
 export { InputField } from "./InputField";

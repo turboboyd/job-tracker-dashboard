@@ -1,51 +1,55 @@
 import type { SerializedError } from "@reduxjs/toolkit";
 
-import type { ApiError } from "./rtkError";
+import type { ApiError } from "./rtk/rtkError";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
 
+function normalizeMessage(v: unknown): string | null {
+  if (typeof v !== "string") return null;
+  const msg = v.trim();
+  return msg.length > 0 ? msg : null;
+}
+
+function pickMessageFromRecord(record: Record<string, unknown>): string | null {
+  const direct = normalizeMessage(record["message"]);
+  if (direct) return direct;
+
+  const data = record["data"];
+  if (isRecord(data)) {
+    const dataMsg = normalizeMessage(data["message"]);
+    if (dataMsg) return dataMsg;
+  }
+
+  const err = record["error"];
+  const errMsg = normalizeMessage(err);
+  if (errMsg) return errMsg;
+
+  if (isRecord(err)) {
+    const nestedMsg = normalizeMessage(err["message"]);
+    if (nestedMsg) return nestedMsg;
+  }
+
+  return null;
+}
 
 export function selectRtkqErrorMessage(error: unknown): string | null {
   if (!error) return null;
 
-  if (isRecord(error) && typeof (error as ApiError).message === "string") {
-    const msg = (error as ApiError).message.trim();
-    if (msg) return msg;
-  }
-
-  if (
-    isRecord(error) &&
-    typeof (error as SerializedError).message === "string"
-  ) {
-    const msg = ((error as SerializedError).message ?? "").trim();
-    if (msg) return msg;
-  }
-
   if (isRecord(error)) {
-    const data = error["data"];
-    if (isRecord(data) && typeof data["message"] === "string") {
-      const msg = String(data["message"]).trim();
-      if (msg) return msg;
-    }
+    const apiMsg = normalizeMessage((error as ApiError).message);
+    if (apiMsg) return apiMsg;
 
-    if (typeof error["error"] === "string") {
-      const msg = String(error["error"]).trim();
-      if (msg) return msg;
-    }
+    const serializedMsg = normalizeMessage((error as SerializedError).message);
+    if (serializedMsg) return serializedMsg;
 
-    const nested = error["error"];
-    if (isRecord(nested) && typeof nested["message"] === "string") {
-      const msg = String(nested["message"]).trim();
-      if (msg) return msg;
-    }
+    const recordMsg = pickMessageFromRecord(error);
+    if (recordMsg) return recordMsg;
   }
-
 
   if (error instanceof Error) {
-    const msg = error.message.trim();
-    if (msg) return msg;
+    return normalizeMessage(error.message);
   }
 
   return null;

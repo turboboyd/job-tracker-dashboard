@@ -21,6 +21,10 @@ type Action =
   | { type: "FIRST" }
   | { type: "LAST"; totalPages: number };
 
+function assertNever(value: never): never {
+  throw new Error(`Unexpected action: ${JSON.stringify(value)}`);
+}
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_PAGE":
@@ -32,9 +36,7 @@ function reducer(state: State, action: Action): State {
     case "LAST":
       return { requestedPage: action.totalPages };
     default: {
-       
-      const _never: never = action;
-      return state;
+      return assertNever(action);
     }
   }
 }

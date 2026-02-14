@@ -1,1 +1,1 @@
-export * from "./getFieldError";
+export { getFieldError } from "./getFieldError";

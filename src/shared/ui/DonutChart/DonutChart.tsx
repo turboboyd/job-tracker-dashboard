@@ -188,6 +188,17 @@ export function DonutChart({
               segmentsForRender.map((seg) => {
                 const isActive = activeKey === seg.label;
 
+                // We intentionally render slice colors via explicit `stroke`
+                // values (derived from the provided className) to avoid cases
+                // where Tailwind config does not generate certain `stroke-*`
+                // utilities (e.g. red/violet) and the segment becomes invisible.
+                const segStroke = strokeColorFromClass(seg.className);
+
+                let segOpacity = 1;
+                if (!isActive && activeKey) {
+                  segOpacity = 0.62;
+                }
+
                 const initialDasharray = `0 ${circumference}`;
                 const targetDasharray = seg.dasharray;
 
@@ -220,7 +231,7 @@ export function DonutChart({
                       r={radius}
                       fill="transparent"
                       strokeLinecap="round"
-                      className={seg.className}
+                      stroke={segStroke}
                       strokeDashoffset={seg.dashoffset}
                       vectorEffect="non-scaling-stroke"
                       style={{
@@ -239,8 +250,7 @@ export function DonutChart({
                       }
                       animate={{
                         strokeDasharray: targetDasharray,
-
-                        opacity: isActive ? 1 : activeKey ? 0.62 : 1,
+                        opacity: segOpacity,
                         scale: isActive ? 1.012 : 1,
                         strokeWidth: isActive ? stroke + 2 : stroke,
                         filter: isActive ? "url(#donutGlow)" : "none",
@@ -301,10 +311,8 @@ export function DonutChart({
                   >
                     <div className="flex items-center justify-center gap-sm">
                       <span
-                        className={[
-                          "h-2 w-2 rounded-full",
-                          dotClassFromStroke(active.className),
-                        ].join(" ")}
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: strokeColorFromClass(active.className) }}
                       />
                       <span className="truncate font-medium">
                         {active.label}
@@ -338,10 +346,8 @@ export function DonutChart({
               >
                 <div className="flex min-w-0 items-center gap-sm">
                   <span
-                    className={[
-                      "h-2.5 w-2.5 rounded-full",
-                      dotClassFromStroke(s.className),
-                    ].join(" ")}
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: strokeColorFromClass(s.className) }}
                   />
                   <span className="truncate text-sm text-foreground leading-normal">
                     {s.label}
@@ -401,11 +407,17 @@ function toNumberOrNull(s: string) {
   return Number.isFinite(n) ? n : null;
 }
 
-function dotClassFromStroke(strokeClass: string) {
-  if (strokeClass.includes("stroke-blue")) return "bg-blue-500";
-  if (strokeClass.includes("stroke-amber")) return "bg-amber-500";
-  if (strokeClass.includes("stroke-purple")) return "bg-purple-500";
-  if (strokeClass.includes("stroke-red")) return "bg-red-500";
-  if (strokeClass.includes("stroke-emerald")) return "bg-emerald-500";
-  return "bg-foreground";
+function strokeColorFromClass(strokeClass: string) {
+  // Use explicit colors to avoid relying on Tailwind generating stroke utilities.
+  // These hex values match Tailwind's default *-500 palette.
+  if (strokeClass.includes("stroke-blue")) return "#3b82f6";
+  if (strokeClass.includes("stroke-indigo")) return "#6366f1";
+  if (strokeClass.includes("stroke-violet")) return "#8b5cf6";
+  if (strokeClass.includes("stroke-purple")) return "#a855f7";
+  if (strokeClass.includes("stroke-amber")) return "#f59e0b";
+  if (strokeClass.includes("stroke-emerald")) return "#10b981";
+  if (strokeClass.includes("stroke-rose")) return "#f43f5e";
+  if (strokeClass.includes("stroke-red")) return "#ef4444";
+  if (strokeClass.includes("stroke-slate")) return "#64748b";
+  return "currentColor";
 }

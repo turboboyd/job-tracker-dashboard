@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useAuthSelectors } from "src/app/store/auth";
-import { useUpdateUserSettingsMutation } from "src/app/store/userSettings";
+
+
+import { useAuthSelectors } from "src/entities/auth";
+import { useUpdateUserSettingsMutation } from "src/entities/userSettings";
 import type { SupportedLng } from "src/shared/config/i18n/i18n";
 
 import { LANGUAGES } from "./languages";
@@ -14,25 +16,11 @@ import {
 
 export type LanguageSelectConnectedProps = {
   labelMode?: LanguageLabelMode;
-
-  /**
-   * Если задано — компонент будет controlled.
-   * Если не задано — значение берётся из i18n.language.
-   */
   value?: SupportedLng;
-
-  /** Событие изменения (полезно, если родитель хочет реагировать) */
   onChanged?: (next: SupportedLng) => void;
-
-  /**
-   * Если true (по умолчанию), и пользователь залогинен — сохраняем выбранный язык
-   * в users/{uid}/private/settings.uiLanguage.
-   */
   persistForAuthedUser?: boolean;
-
   disabled?: boolean;
   className?: string;
-
   size?: "sm" | "md" | "lg";
   radius?: "md" | "lg" | "xl";
   width?: "full" | "auto";
@@ -85,10 +73,8 @@ export function LanguageSelectConnected({
   }, [value, i18n.language, languages, fallback]);
 
   async function handleChange(next: SupportedLng) {
-    // UI язык меняем сразу
     await i18n.changeLanguage(next);
 
-    // Persist — best effort
     if (canPersist && userId) {
       setIsPersisting(true);
       try {
@@ -97,7 +83,7 @@ export function LanguageSelectConnected({
           patch: { uiLanguage: next },
         }).unwrap();
       } catch {
-        // оставляем локальную смену языка даже если сохранение не удалось
+        // 
       } finally {
         setIsPersisting(false);
       }

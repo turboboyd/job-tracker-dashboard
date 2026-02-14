@@ -56,9 +56,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
           interactive &&
             classNames(
               "transition-all duration-normal ease-ease-out",
+              "transition-shadow duration-normal ease-ease-out",
               "motion-safe:hover:-translate-y-0.5",
-              "motion-safe:hover:shadow-sm",
-              "motion-safe:hover:bg-muted"
+              "motion-safe:hover:shadow-md",
+              "motion-safe:hover:bg-muted/40",
+              "motion-safe:hover:border-ring/30"
             ),
           className
         )}

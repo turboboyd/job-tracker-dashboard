@@ -4,31 +4,42 @@ import React from "react";
 import { classNames } from "src/shared/lib";
 
 export type SelectIntent = "default" | "error" | "success" | "warning";
-
-
 export type SelectStateLegacy = "default" | "error";
 
 export type SelectSize = "sm" | "md" | "lg";
 export type SelectRadius = "md" | "lg" | "xl";
-
 export type SelectWidth = "full" | "auto";
 
 const selectVariants = cva(
   [
-    "block",
-    "bg-background text-foreground",
-    "border border-input",
-    "outline-none",
-    "transition-colors duration-fast ease-ease-out",
-    "shadow-sm",
-
+    // layout
+    "block w-full",
+    "appearance-none",
     "cursor-pointer",
     "disabled:cursor-not-allowed",
+    "disabled:pointer-events-none disabled:opacity-50",
 
+    // colors (your tokens)
+    "bg-input text-foreground",
+    "border border-input",
+
+    // typography / spacing baseline
+    "leading-normal",
+
+    // focus
+    "outline-none",
     "focus-visible:ring-2 focus-visible:ring-ring",
     "focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 
-    "disabled:pointer-events-none disabled:opacity-50",
+    // “adult” feel: smooth shadow + subtle lift on hover
+    "shadow-sm",
+    "transition-colors transition-shadow duration-normal ease-ease-out",
+    "hover:shadow-md",
+    "active:shadow-sm",
+
+    // subtle border/brightness changes on hover
+    "hover:border-border",
+    "bg-clip-padding",
   ].join(" "),
   {
     variants: {
@@ -49,13 +60,13 @@ const selectVariants = cva(
       intent: {
         default: "border-input",
         error: "border-destructive focus-visible:ring-destructive",
-        success: "border-emerald-500 focus-visible:ring-emerald-500",
-        warning: "border-amber-500 focus-visible:ring-amber-500",
+        success: "border-success-foreground focus-visible:ring-success-foreground",
+        warning: "border-warning-foreground focus-visible:ring-warning-foreground",
       },
       shadow: {
-        none: "shadow-none",
-        sm: "shadow-sm",
-        md: "shadow-md",
+        none: "shadow-none hover:shadow-none",
+        sm: "shadow-sm hover:shadow-md",
+        md: "shadow-md hover:shadow-lg",
       },
     },
     defaultVariants: {
@@ -67,7 +78,6 @@ const selectVariants = cva(
     },
   }
 );
-
 
 export type SelectOption<T extends string> = {
   value: T;
@@ -123,7 +133,9 @@ export function Select<T extends string>({
     >
       {placeholderOption !== undefined ? (
         <option value="" disabled>
-          {placeholderOption}
+          {typeof placeholderOption === "string"
+            ? placeholderOption
+            : String(placeholderOption)}
         </option>
       ) : null}
 
