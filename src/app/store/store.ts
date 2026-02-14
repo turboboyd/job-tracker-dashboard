@@ -1,17 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
-import { baseApi } from "src/shared/api/baseApi";
-import { uiReducer } from "src/shared/model/uiSlice";
+import { baseApi } from "src/shared/api/rtk/baseApi";
+
+import { rootReducer } from "./rootReducer";
 
 export const store = configureStore({
-  reducer: {
-    ui: uiReducer,
-    [baseApi.reducerPath]: baseApi.reducer
-  },
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware)
+    getDefaultMiddleware().concat(baseApi.middleware),
 });
+
+setupListeners(store.dispatch);
 
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
