@@ -1,113 +1,127 @@
-import { useMemo } from "react";
+import { SlidersHorizontal } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-import { useJobs } from "src/entities/job/api/useJobs";
-import { useAuth } from "src/shared/lib";
 import {
+  AppRoutes,
+  RoutePath,
+} from "src/app/providers/router/routeConfig/routeConfig";
+import { Button } from "src/shared/ui";
+
+import { useDashboardData } from "./model/useDashboardData";
+import {
+  DashboardLoopsFilterModal,
   DashboardOnboardingActions,
   DashboardPipelineCard,
   DashboardRecentJobsCard,
   DashboardStats,
-} from "./components";
-
-type Status = "saved" | "applied" | "interview" | "rejected";
-
-type JobLike = {
-  id: string;
-  createdAt?: unknown;
-  title?: string | null;
-  company?: string | null;
-  status?: unknown;
-};
-
-const ROUTES = {
-  profile: "/dashboard/profile",
-  questions: "/dashboard/profile/questions",
-  loop: "/dashboard/loop",
-  jobs: "/dashboard/jobs",
-} as const;
-
-function isStatus(v: unknown): v is Status {
-  return (
-    v === "saved" || v === "applied" || v === "interview" || v === "rejected"
-  );
-}
-
-function buildSummary(statuses: Status[]) {
-  const s = { total: 0, saved: 0, applied: 0, interview: 0, rejected: 0 };
-  for (const st of statuses) {
-    s.total += 1;
-    s[st] += 1;
-  }
-  return s;
-}
-
-function toMillis(value: unknown): number {
-  if (
-    value &&
-    typeof (value as { toMillis?: unknown }).toMillis === "function"
-  ) {
-    return (value as { toMillis: () => number }).toMillis();
-  }
-  if (typeof value === "number") return value;
-  return 0;
-}
+  DashboardTabsNav,
+} from "./ui";
 
 export default function DashboardPage() {
+  const { t } = useTranslation(undefined, { keyPrefix: "dashboard" });
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [loopsModalOpen, setLoopsModalOpen] = useState(false);
 
-  const { jobs, isLoading, error } = useJobs(user?.uid);
+  const {
+    loops,
+    loopsFilter,
+    setLoopsFilter,
+    isLoading,
+    error,
+    hasMatches,
+    recent,
+    pipelineSummary,
+  } = useDashboardData();
 
-  const summary = useMemo(() => {
-    const statuses = (jobs as JobLike[]).map((j) => j.status).filter(isStatus);
-    return buildSummary(statuses);
-  }, [jobs]);
+  const goProfile = () => navigate(RoutePath[AppRoutes.SETTINGS_PROFILE]);
+  const goQuestions = () => navigate(RoutePath[AppRoutes.PROFILE_QUESTIONS]);
+  const goLoop = () => navigate(RoutePath[AppRoutes.LOOPS]);
+  const goMatches = () => navigate(RoutePath[AppRoutes.MATCHES]);
 
-  const hasJobs = summary.total > 0;
-
-  const recent = useMemo(() => {
-    const copy = [...(jobs as JobLike[])];
-    copy.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
-    return copy.slice(0, 5);
-  }, [jobs]);
+  // Чтобы не сортировать/маппить на каждый рендер
+  const loopsForModal = useMemo(
+    () =>
+      loops
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((l) => ({ id: l.id, name: l.name })),
+    [loops],
+  );
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <div className="text-sm font-semibold text-foreground">
-          You&apos;re almost there!
-        </div>
+    <div className="flex h-full flex-col">
+      <div className="shrink-0 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex flex-col gap-3 px-1 pb-4 pt-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-base font-semibold text-foreground">
+              {t("tabs.overview")}
+            </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <DashboardOnboardingActions
-            hasJobs={hasJobs}
-            onGoProfile={() => navigate(ROUTES.profile)}
-            onGoQuestions={() => navigate(ROUTES.questions)}
-            onGoLoop={() => navigate(ROUTES.loop)}
-            onGoJobs={() => navigate(ROUTES.jobs)}
-          />
+            <Button
+              size="sm"
+              variant="outline"
+              shape="pill"
+              onClick={() => setLoopsModalOpen(true)}
+              className="gap-2"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              {t("loopsFilter.button")}
+            </Button>
+          </div>
 
-          <DashboardRecentJobsCard
-            jobs={recent}
-            onViewAll={() => navigate(ROUTES.jobs)}
-          />
-
-          <DashboardPipelineCard summary={summary} size={240} stroke={16} />
+          <DashboardTabsNav />
         </div>
       </div>
 
-      <DashboardStats
-        isLoading={isLoading}
-        error={error}
-        summary={summary}
-        onGoJobs={(status) =>
-          navigate(
-            status ? `/dashboard/jobs?status=${status}` : "/dashboard/jobs"
-          )
-        }
-        onAddFirstJob={() => navigate("/dashboard/jobs?focus=add")}
+      <DashboardLoopsFilterModal
+        open={loopsModalOpen}
+        onOpenChange={setLoopsModalOpen}
+        loops={loopsForModal}
+        value={loopsFilter}
+        onChange={setLoopsFilter}
       />
+
+      <div className="flex-1 overflow-y-auto pb-6">
+        <div className="space-y-6 p-6">
+          <div className="space-y-3">
+            <div className="text-sm font-semibold text-foreground">
+              {t("onboardingTitle")}
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <DashboardOnboardingActions
+                hasJobs={hasMatches}
+                onGoProfile={goProfile}
+                onGoQuestions={goQuestions}
+                onGoLoop={goLoop}
+                onGoJobs={goMatches}
+              />
+
+              <DashboardRecentJobsCard jobs={recent} onViewAll={goMatches} />
+              <DashboardPipelineCard
+                summary={pipelineSummary}
+                size={240}
+                stroke={16}
+              />
+            </div>
+          </div>
+
+          <DashboardStats
+            isLoading={isLoading}
+            error={error}
+            summary={pipelineSummary}
+            onGoJobs={(status) => {
+              if (!status) return navigate(RoutePath[AppRoutes.MATCHES]);
+              return navigate(`${RoutePath[AppRoutes.MATCHES]}?status=${status}`);
+            }}
+            onAddFirstJob={() =>
+              navigate(`${RoutePath[AppRoutes.MATCHES]}?focus=add`)
+            }
+          />
+        </div>
+      </div>
     </div>
   );
 }

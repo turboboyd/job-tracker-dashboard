@@ -6,9 +6,11 @@ export type IconName =
   | "loop"
   | "add"
   | "total"
+  | "new"
   | "applied"
   | "saved"
   | "interview"
+  | "offer"
   | "rejected";
 
 const ICONS: Record<IconName, string> = {
@@ -18,9 +20,11 @@ const ICONS: Record<IconName, string> = {
   add: "➕",
 
   total: "🔗",
+  new: "🆕",
   applied: "📄",
   saved: "🔄",
   interview: "✉️",
+  offer: "🎉",
   rejected: "⚠️",
 };
 
@@ -33,9 +37,11 @@ const COLOR: Record<IconName, string> = {
 
   // KPI (по смыслу/статусу)
   total: "text-foreground",
+  new: "text-slate-700 dark:text-slate-200",
   applied: "text-blue-600 dark:text-blue-400",
   saved: "text-amber-600 dark:text-amber-400",
   interview: "text-purple-600 dark:text-purple-400",
+  offer: "text-emerald-600 dark:text-emerald-400",
   rejected: "text-red-600 dark:text-red-400",
 };
 
