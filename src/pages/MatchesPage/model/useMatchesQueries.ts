@@ -1,6 +1,8 @@
+import { useAuthSelectors } from "src/entities/auth";
 import { useGetLoopsQuery } from "src/entities/loop";
 import { useGetAllMatchesQuery } from "src/entities/loopMatch";
-import { useAuthSelectors } from "src/features/auth";
+
+
 
 export function useMatchesQueries() {
   const { isAuthReady, isAuthenticated } = useAuthSelectors();

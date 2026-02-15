@@ -1,5 +1,6 @@
 import React from "react";
 
+import { useAuthSelectors } from "src/entities/auth";
 import {
   useDeleteMatchMutation,
   useUpdateMatchMutation,
@@ -7,7 +8,6 @@ import {
   type UpdateMatchInput,
 } from "src/entities/loopMatch";
 import type { LoopMatchStatus } from "src/entities/loopMatch";
-import { useAuthSelectors } from "src/features/auth";
 import { notify } from "src/shared/lib";
 import { getErrorMessage } from "src/shared/lib/errors";
 
@@ -15,7 +15,7 @@ import { getErrorMessage } from "src/shared/lib/errors";
  * All match mutations.
  *
  * NOTE: we do NOT pass `userId` anymore.
- * Firestore ownership is derived from the document path: users/{uid}/loopMatches/... 
+ * Firestore ownership is derived from the document path: users/{uid}/loopMatches/...
  */
 export function useMatchesMutations() {
   const { isAuthReady, isAuthenticated } = useAuthSelectors();
@@ -45,7 +45,7 @@ export function useMatchesMutations() {
         notify("error", `Failed to delete match: ${getErrorMessage(err)}`);
       }
     },
-    [deleteMatch, guardAuth]
+    [deleteMatch, guardAuth],
   );
 
   const onUpdateStatus = React.useCallback(
@@ -59,7 +59,7 @@ export function useMatchesMutations() {
         notify("error", `Failed to update match: ${getErrorMessage(err)}`);
       }
     },
-    [guardAuth, updateStatus]
+    [guardAuth, updateStatus],
   );
 
   const onSaveEdit = React.useCallback(
@@ -74,7 +74,7 @@ export function useMatchesMutations() {
         throw err;
       }
     },
-    [guardAuth, updateMatch]
+    [guardAuth, updateMatch],
   );
 
   return { busy, actions: { onDelete, onUpdateStatus, onSaveEdit } };

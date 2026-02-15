@@ -1,8 +1,8 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { useAuthSelectors } from "src/entities/auth";
 import type { UpdateMatchInput, LoopMatchStatus } from "src/entities/loopMatch";
-import { useAuthSelectors } from "src/features/auth";
 import { usePagination } from "src/shared/lib/pagination/usePagination";
 
 import { matchesFiltersDefaults } from "./filters";
@@ -88,7 +88,8 @@ export function useMatchesPageController() {
     (next: number | ((prev: number) => number)) => {
       pagination.setPage(next);
 
-      const nextValue = typeof next === "function" ? next(pagination.page) : next;
+      const nextValue =
+        typeof next === "function" ? next(pagination.page) : next;
       const safe = Math.max(1, Number(nextValue) || 1);
       writeMatchesStateToUrl({
         navigate,
