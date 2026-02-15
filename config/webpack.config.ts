@@ -28,15 +28,19 @@ export default (_env: unknown, argv: { mode?: BuildMode }): Configuration => {
 
     entry: path.resolve(options.paths.src, "main.tsx"),
 
-  output: {
-  path: options.paths.dist,
-  filename: isProd ? "assets/js/[name].[contenthash:8].js" : "assets/js/[name].js",
-  chunkFilename: isProd
-    ? "assets/js/[name].[contenthash:8].chunk.js"
-    : "assets/js/[name].chunk.js",
-  publicPath: "/",
-  clean: true,
-},
+    output: {
+      path: options.paths.dist,
+      filename: isProd
+        ? "assets/js/[name].[contenthash:8].js"
+        : "assets/js/[name].js",
+      chunkFilename: isProd
+        ? "assets/js/[name].[contenthash:8].chunk.js"
+        : "assets/js/[name].chunk.js",
+      publicPath: process.env.PUBLIC_URL
+        ? `${process.env.PUBLIC_URL.replace(/\/$/, "")}/`
+        : "/",
+      clean: true,
+    },
 
     devtool: isProd ? "source-map" : "eval-cheap-module-source-map",
 

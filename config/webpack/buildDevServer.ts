@@ -9,6 +9,8 @@ export function buildDevServer(options: BuildOptions): DevServerConfiguration {
     historyApiFallback: true,
     static: {
       directory: options.paths.public,
+      publicPath: process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL.replace(/\/$/, "")}/` : "/",
+      watch: true,
     },
     client: {
       overlay: {

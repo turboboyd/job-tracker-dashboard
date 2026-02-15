@@ -15,5 +15,7 @@ export function buildEnv(isProd: boolean): Record<string, string> {
 
   return {
     __ENV__: JSON.stringify(env),
+     __IS_PROD__: JSON.stringify(isProd),
+    __PUBLIC_URL__: JSON.stringify(process.env.PUBLIC_URL || ""),
   };
 }
