@@ -1,54 +1,16 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import type { CanonicalFilters } from "src/entities/loop/model";
 import { Button, FormField, Input } from "src/shared/ui";
+
+import type { CanonicalFilters } from "../../model";
 
 const RADIUS_OPTIONS: CanonicalFilters["radiusKm"][] = [5, 10, 20, 30, 50, 100];
 const POSTED_WITHIN_OPTIONS: CanonicalFilters["postedWithin"][] = [
   1, 3, 7, 14, 30,
 ];
 
-const WORK_MODE_OPTIONS: Array<{
-  value: CanonicalFilters["workMode"];
-  label: string;
-}> = [
-  { value: "any", label: "Any" },
-  { value: "onsite", label: "On-site" },
-  { value: "hybrid", label: "Hybrid" },
-  { value: "remote", label: "Remote" },
-  { value: "remote_only", label: "Remote-only" },
-];
-
-const SENIORITY_OPTIONS: Array<{
-  value: CanonicalFilters["seniority"];
-  label: string;
-}> = [
-  { value: "intern", label: "Intern" },
-  { value: "junior", label: "Junior" },
-  { value: "mid", label: "Mid" },
-  { value: "senior", label: "Senior" },
-  { value: "lead", label: "Lead" },
-];
-
-const EMPLOYMENT_OPTIONS: Array<{
-  value: CanonicalFilters["employmentType"];
-  label: string;
-}> = [
-  { value: "full_time", label: "Full-time" },
-  { value: "part_time", label: "Part-time" },
-  { value: "contract", label: "Contract" },
-  { value: "internship", label: "Internship" },
-  { value: "ausbildung", label: "Ausbildung" },
-];
-
-const LANGUAGE_OPTIONS: Array<{
-  value: CanonicalFilters["language"];
-  label: string;
-}> = [
-  { value: "any", label: "Any" },
-  { value: "de", label: "DE" },
-  { value: "en", label: "EN" },
-];
+type Option<T> = { value: T; label: string };
 
 type Props = {
   value: CanonicalFilters;
@@ -71,25 +33,103 @@ export function CompactFilters({
   onReset,
   disabled,
 }: Props) {
+  const { t } = useTranslation();
   const [advancedOpen, setAdvancedOpen] = useState(false);
+
+  const workModeOptions: Array<Option<CanonicalFilters["workMode"]>> = useMemo(
+    () => [
+      { value: "any", label: t("loops.workMode.any", "Any") },
+      { value: "onsite", label: t("loops.workMode.onsite", "On-site") },
+      { value: "hybrid", label: t("loops.workMode.hybrid", "Hybrid") },
+      { value: "remote", label: t("loops.workMode.remote", "Remote") },
+      {
+        value: "remote_only",
+        label: t("loops.workMode.remoteOnly", "Remote-only"),
+      },
+    ],
+    [t]
+  );
+
+  const seniorityOptions: Array<Option<CanonicalFilters["seniority"]>> = useMemo(
+    () => [
+      { value: "intern", label: t("loops.seniority.intern", "Intern") },
+      { value: "junior", label: t("loops.seniority.junior", "Junior") },
+      { value: "mid", label: t("loops.seniority.mid", "Mid") },
+      { value: "senior", label: t("loops.seniority.senior", "Senior") },
+      { value: "lead", label: t("loops.seniority.lead", "Lead") },
+    ],
+    [t]
+  );
+
+  const employmentOptions: Array<Option<CanonicalFilters["employmentType"]>> =
+    useMemo(
+      () => [
+        {
+          value: "full_time",
+          label: t("loops.employment.fullTime", "Full-time"),
+        },
+        {
+          value: "part_time",
+          label: t("loops.employment.partTime", "Part-time"),
+        },
+        { value: "contract", label: t("loops.employment.contract", "Contract") },
+        {
+          value: "internship",
+          label: t("loops.employment.internship", "Internship"),
+        },
+        {
+          value: "ausbildung",
+          label: t("loops.employment.ausbildung", "Ausbildung"),
+        },
+      ],
+      [t]
+    );
+
+  const languageOptions: Array<Option<CanonicalFilters["language"]>> = useMemo(
+    () => [
+      { value: "any", label: t("loops.language.any", "Any") },
+      { value: "de", label: t("loops.language.de", "DE") },
+      { value: "en", label: t("loops.language.en", "EN") },
+    ],
+    [t]
+  );
 
   const badges = useMemo(() => {
     const out: string[] = [];
-    if (value.role.trim()) out.push(`Role: ${value.role.trim()}`);
-    if (value.location.trim()) out.push(`Loc: ${value.location.trim()}`);
-    out.push(`Radius: ${value.radiusKm}km`);
-    if (value.workMode !== "any") out.push(`Mode: ${value.workMode}`);
-    out.push(`Posted: ${value.postedWithin}d`);
+    const role = value.role.trim();
+    const location = value.location.trim();
+
+    if (role)
+      out.push(t("loops.badgeRole", "Role: {{value}}", { value: role }));
+    if (location)
+      out.push(t("loops.badgeLoc", "Loc: {{value}}", { value: location }));
+
+    out.push(
+      t("loops.badgeRadius", "Radius: {{value}}km", { value: value.radiusKm })
+    );
+
+    if (value.workMode !== "any")
+      out.push(t("loops.badgeMode", "Mode: {{value}}", { value: value.workMode }));
+
+    out.push(
+      t("loops.badgePosted", "Posted: {{value}}d", { value: value.postedWithin })
+    );
+
     return out;
-  }, [value]);
+  }, [t, value]);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="text-base font-semibold text-foreground">Filters</div>
+          <div className="text-base font-semibold text-foreground">
+            {t("loops.filtersTitle", "Filters")}
+          </div>
           <div className="mt-1 text-sm text-muted-foreground">
-            Update → Apply → links refresh & saved to loop.
+            {t(
+              "loops.filtersSubtitle",
+              "Update → Apply → links refresh & saved to loop."
+            )}
           </div>
 
           {badges.length ? (
@@ -114,7 +154,7 @@ export function CompactFilters({
             onClick={onApply}
             disabled={disabled}
           >
-            Apply
+            {t("loops.apply", "Apply")}
           </Button>
           <Button
             variant="outline"
@@ -122,52 +162,53 @@ export function CompactFilters({
             onClick={onReset}
             disabled={disabled}
           >
-            Reset
+            {t("loops.reset", "Reset")}
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
         <div className="md:col-span-5">
-          <FormField label="Profession / Role">
+          <FormField label={t("loops.professionRole", "Profession / Role")}>
             <Input
               value={value.role}
               onChange={(e) => onChange({ ...value, role: e.target.value })}
-              placeholder="Fachinformatiker OR React Developer"
+              placeholder={t(
+                "loops.professionRolePlaceholder",
+                "Fachinformatiker OR React Developer"
+              )}
               disabled={disabled}
             />
           </FormField>
         </div>
 
         <div className="md:col-span-4">
-          <FormField label="Location">
+          <FormField label={t("loops.location", "Location")}>
             <Input
               value={value.location}
               onChange={(e) => onChange({ ...value, location: e.target.value })}
-              placeholder="Berlin"
+              placeholder={t("loops.locationPlaceholder", "Berlin")}
               disabled={disabled}
             />
           </FormField>
         </div>
 
         <div className="md:col-span-2">
-          <FormField label="Radius">
+          <FormField label={t("loops.radius", "Radius")}>
             <select
               value={value.radiusKm}
               onChange={(e) =>
                 onChange({
                   ...value,
-                  radiusKm: Number(
-                    e.target.value
-                  ) as CanonicalFilters["radiusKm"],
+                  radiusKm: Number(e.target.value) as CanonicalFilters["radiusKm"],
                 })
               }
-              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground"
+              className="h-10 w-full rounded-xl border border-border bg-input px-3 text-sm text-foreground"
               disabled={disabled}
             >
               {RADIUS_OPTIONS.map((r) => (
                 <option key={r} value={r}>
-                  {r} km
+                  {t("loops.km", "{{value}} km", { value: r })}
                 </option>
               ))}
             </select>
@@ -183,7 +224,9 @@ export function CompactFilters({
               onClick={() => setAdvancedOpen((v) => !v)}
               disabled={disabled}
             >
-              {advancedOpen ? "Less" : "More"}
+              {advancedOpen
+                ? t("loops.less", "Less")
+                : t("loops.more", "More")}
             </Button>
           </FormField>
         </div>
@@ -193,7 +236,7 @@ export function CompactFilters({
         <div className="rounded-2xl border border-border bg-background p-4 space-y-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
             <div className="md:col-span-3">
-              <FormField label="Work mode">
+              <FormField label={t("loops.workModeTitle", "Work mode")}>
                 <select
                   value={value.workMode}
                   onChange={(e) =>
@@ -205,7 +248,7 @@ export function CompactFilters({
                   className="h-10 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                   disabled={disabled}
                 >
-                  {WORK_MODE_OPTIONS.map((o) => (
+                  {workModeOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
@@ -215,20 +258,19 @@ export function CompactFilters({
             </div>
 
             <div className="md:col-span-3">
-              <FormField label="Seniority">
+              <FormField label={t("loops.seniorityTitle", "Seniority")}>
                 <select
                   value={value.seniority}
                   onChange={(e) =>
                     onChange({
                       ...value,
-                      seniority: e.target
-                        .value as CanonicalFilters["seniority"],
+                      seniority: e.target.value as CanonicalFilters["seniority"],
                     })
                   }
                   className="h-10 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                   disabled={disabled}
                 >
-                  {SENIORITY_OPTIONS.map((o) => (
+                  {seniorityOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
@@ -238,20 +280,19 @@ export function CompactFilters({
             </div>
 
             <div className="md:col-span-3">
-              <FormField label="Employment type">
+              <FormField label={t("loops.employmentType", "Employment type")}>
                 <select
                   value={value.employmentType}
                   onChange={(e) =>
                     onChange({
                       ...value,
-                      employmentType: e.target
-                        .value as CanonicalFilters["employmentType"],
+                      employmentType: e.target.value as CanonicalFilters["employmentType"],
                     })
                   }
                   className="h-10 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                   disabled={disabled}
                 >
-                  {EMPLOYMENT_OPTIONS.map((o) => (
+                  {employmentOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
@@ -261,7 +302,7 @@ export function CompactFilters({
             </div>
 
             <div className="md:col-span-3">
-              <FormField label="Posted within">
+              <FormField label={t("loops.postedWithin", "Posted within")}>
                 <select
                   value={value.postedWithin}
                   onChange={(e) =>
@@ -277,7 +318,7 @@ export function CompactFilters({
                 >
                   {POSTED_WITHIN_OPTIONS.map((d) => (
                     <option key={d} value={d}>
-                      {d} days
+                      {t("loops.days", "{{value}} days", { value: d })}
                     </option>
                   ))}
                 </select>
@@ -288,8 +329,11 @@ export function CompactFilters({
           <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
             <div className="md:col-span-6">
               <FormField
-                label="Include keywords"
-                hint="Optional, will be appended to search query"
+                label={t("loops.includeKeywords", "Include keywords")}
+                hint={t(
+                  "loops.includeKeywordsHint",
+                  "Optional, will be appended to search query"
+                )}
               >
                 <Input
                   value={value.includeKeywords}
@@ -299,7 +343,7 @@ export function CompactFilters({
                       includeKeywords: parseKeywordLine(e.target.value),
                     })
                   }
-                  placeholder="react typescript next"
+                  placeholder={t("loops.includeKeywordsPlaceholder", "react typescript next")}
                   disabled={disabled}
                 />
               </FormField>
@@ -307,8 +351,11 @@ export function CompactFilters({
 
             <div className="md:col-span-6">
               <FormField
-                label="Exclude keywords"
-                hint="Optional, will be appended as exclusions"
+                label={t("loops.excludeKeywords", "Exclude keywords")}
+                hint={t(
+                  "loops.excludeKeywordsHint",
+                  "Optional, will be appended as exclusions"
+                )}
               >
                 <Input
                   value={value.excludeKeywords}
@@ -318,7 +365,10 @@ export function CompactFilters({
                       excludeKeywords: parseKeywordLine(e.target.value),
                     })
                   }
-                  placeholder="senior lead manager zeitarbeit"
+                  placeholder={t(
+                    "loops.excludeKeywordsPlaceholder",
+                    "senior lead manager zeitarbeit"
+                  )}
                   disabled={disabled}
                 />
               </FormField>
@@ -327,7 +377,7 @@ export function CompactFilters({
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
             <div className="md:col-span-3">
-              <FormField label="Language">
+              <FormField label={t("loops.languageTitle", "Language")}>
                 <select
                   value={value.language}
                   onChange={(e) =>
@@ -339,7 +389,7 @@ export function CompactFilters({
                   className="h-10 w-full rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                   disabled={disabled}
                 >
-                  {LANGUAGE_OPTIONS.map((o) => (
+                  {languageOptions.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
                     </option>
@@ -358,7 +408,7 @@ export function CompactFilters({
                   }
                   disabled={disabled}
                 />
-                Exclude agencies / Zeitarbeit
+                {t("loops.excludeAgencies", "Exclude agencies / Zeitarbeit")}
               </label>
             </div>
 
@@ -366,8 +416,10 @@ export function CompactFilters({
           </div>
 
           <div className="text-xs text-muted-foreground">
-            Advanced filters are stored in <code>loop.filters</code>. URL
-            builders can be extended later per platform.
+            {t(
+              "loops.advancedInfo",
+              "Advanced filters are stored in loop.filters. URL builders can be extended later per platform."
+            )}
           </div>
         </div>
       ) : null}

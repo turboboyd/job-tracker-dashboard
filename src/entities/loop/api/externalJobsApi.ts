@@ -1,6 +1,6 @@
 import { getAuth } from "firebase/auth";
 
-import { baseApi } from "src/shared/api/baseApi";
+import { baseApi } from "src/shared/api/rtk/baseApi";
 
 export type ExternalProvider = "adzuna" | "jooble";
 

@@ -2,8 +2,6 @@ export { clampRadiusKm } from "./searchFilters";
 
 export type {
   Loop,
-  LoopMatch,
-  LoopMatchStatus,
   RemoteMode,
   CanonicalFilters,
   SearchFilters,

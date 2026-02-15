@@ -3,17 +3,8 @@ import { PLATFORM_REGISTRY } from "./platformRegistry";
 export type RemoteMode = "any" | "remote_only";
 export type ValidationResult = { ok: true } | { ok: false; message: string };
 
-export type LoopMatchStatus =
-  | "new"
-  | "saved"
-  | "interview"
-  | "offer"
-  | "applied"
-  | "rejected";
-
 export type Loop = {
   id: string;
-  userId: string;
   name: string;
   titles: string[];
   location: string;
@@ -21,29 +12,8 @@ export type Loop = {
   filters?: CanonicalFilters;
   remoteMode: RemoteMode;
   platforms: LoopPlatform[];
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type LoopMatch = {
-  id: string;
-
-  userId: string;
-  loopId: string;
-
-  title: string;
-  company: string;
-  location: string;
-
-  platform: LoopPlatform;
-  url: string;
-  description: string;
-
-  status: LoopMatchStatus;
-  matchedAt: string;
-
-  createdAt: string;
-  updatedAt: string;
+  createdAtTs?: number | null;
+  updatedAtTs?: number | null;
 };
 
 export type CanonicalFilters = {

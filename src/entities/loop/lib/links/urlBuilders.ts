@@ -299,6 +299,7 @@ function slugify(s: string) {
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
+    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/anchor-precedence
     .replace(/^-+|-+$/g, "");
 }
 
@@ -391,5 +392,6 @@ export function buildGoogleSiteUrl(
   const q = buildQuery(filters);
   const loc = filters.location.trim();
   const full = [q, loc].filter(Boolean).join(" ");
-  return `https://www.google.com/search?q=${enc(`site:${site} ${full}`)}`;
+  const query = `site:${site} ${full}`.trim();
+  return `https://www.google.com/search?q=${enc(query)}`;
 }

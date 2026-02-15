@@ -1,6 +1,9 @@
-import type { CanonicalFilters } from "src/entities/loop/model";
-import { CompactFilters } from "src/entities/loop/ui/CompactFilters/CompactFilters";
+import { useTranslation } from "react-i18next";
+
 import { Modal } from "src/shared/ui";
+
+import type { CanonicalFilters } from "../../model";
+import { CompactFilters } from "../CompactFilters/CompactFilters";
 
 type Props = {
   open: boolean;
@@ -24,12 +27,16 @@ export function LoopSettingsModal({
   onReset,
   disabled,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="My Loop settings"
-      description="Update filters, click Apply to refresh links and save settings to your loop."
+      title={t("loops.myLoopSettings", "My Loop settings")}
+      description={t(
+        "loops.myLoopSettingsDescription",
+        "Update filters, click Apply to refresh links and save settings to your loop."
+      )}
       size="lg"
     >
       <CompactFilters

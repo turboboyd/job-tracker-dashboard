@@ -1,5 +1,7 @@
+import type { LoopMatchStatus } from "src/entities/loopMatch";
+
 import { ALL_PLATFORMS, PLATFORM_REGISTRY } from "./platformRegistry";
-import type { LoopMatchStatus, LoopPlatform } from "./types";
+import type { LoopPlatform } from "./types";
 
 export const LOOP_PLATFORMS: Array<{ value: LoopPlatform; label: string }> =
   PLATFORM_REGISTRY.map((p) => ({ value: p.id, label: p.label }));

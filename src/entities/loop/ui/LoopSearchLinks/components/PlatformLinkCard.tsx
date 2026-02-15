@@ -1,6 +1,9 @@
-import type { LoopPlatform } from "src/entities/loop/model";
-import { PLATFORM_LABEL_BY_ID } from "src/entities/loop/model/platformRegistry";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "src/shared/ui";
+
+import type { LoopPlatform } from "../../../model";
+import { PLATFORM_LABEL_BY_ID } from "../../../model/platformRegistry";
 
 type Props = {
   platform: LoopPlatform;
@@ -21,6 +24,7 @@ export function PlatformLinkCard({
   onAdd,
   addDisabled,
 }: Props) {
+  const { t } = useTranslation();
   const label = PLATFORM_LABEL_BY_ID[platform] ?? platform;
 
   return (
@@ -40,7 +44,7 @@ export function PlatformLinkCard({
 
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="outline" shape="lg" onClick={onOpen}>
-            Open
+            {t("loops.open", "Open")}
           </Button>
           <Button
             variant="default"
@@ -49,7 +53,7 @@ export function PlatformLinkCard({
             onClick={onAdd}
             disabled={addDisabled}
           >
-            Add
+            {t("loops.add", "Add")}
           </Button>
         </div>
       </div>

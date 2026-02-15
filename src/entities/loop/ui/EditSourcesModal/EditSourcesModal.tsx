@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import type { LoopPlatform } from "src/entities/loop/model";
+import { Button, Modal } from "src/shared/ui";
+
 import {
   ALL_PLATFORMS,
   GROUPS,
   PLATFORM_LABEL_BY_ID,
   RECOMMENDED_PLATFORMS,
   platformsByGroup,
-} from "src/entities/loop/model";
-import { Button, Modal } from "src/shared/ui";
+  type LoopPlatform,
+} from "../../model";
 
 type Props = {
   open: boolean;
@@ -41,6 +43,7 @@ export function EditSourcesModal({
   disabled,
   onSave,
 }: Props) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<LoopPlatform[]>(() =>
     uniquePlatforms(value ?? [])
   );
@@ -96,14 +99,17 @@ export function EditSourcesModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Edit sources"
-      description="Choose job boards/platforms. This controls which search links are generated."
+      title={t("loops.editSources", "Edit sources")}
+      description={t(
+        "loops.editSourcesDescription",
+        "Choose job boards/platforms. This controls which search links are generated."
+      )}
       size="lg"
     >
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="text-sm text-muted-foreground">
-            Selected:{" "}
+            {t("loops.selected", "Selected")}: {" "}
             <span className="font-medium text-foreground">{totalSelected}</span>
           </div>
 
@@ -114,7 +120,7 @@ export function EditSourcesModal({
               onClick={setPresetRecommended}
               disabled={disabled || isSaving}
             >
-              Recommended
+              {t("loops.recommended", "Recommended")}
             </Button>
             <Button
               variant="outline"
@@ -122,14 +128,16 @@ export function EditSourcesModal({
               onClick={setPresetAll}
               disabled={disabled || isSaving}
             >
-              Select all
+              {t("loops.selectAll", "Select all")}
             </Button>
           </div>
         </div>
 
         {/* Groups */}
         <div className="rounded-2xl border border-border bg-background p-4 space-y-3">
-          <div className="text-sm font-semibold text-foreground">Groups</div>
+          <div className="text-sm font-semibold text-foreground">
+            {t("loops.groups", "Groups")}
+          </div>
 
           <div className="flex flex-wrap gap-2">
             {GROUPS.map((g) => {
@@ -169,7 +177,9 @@ export function EditSourcesModal({
 
         {/* All Platforms */}
         <div className="rounded-2xl border border-border bg-background p-4 space-y-3">
-          <div className="text-sm font-semibold text-foreground">Platforms</div>
+          <div className="text-sm font-semibold text-foreground">
+            {t("loops.platforms", "Platforms")}
+          </div>
 
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {sortByLabel(ALL_PLATFORMS).map((p) => {
@@ -210,7 +220,7 @@ export function EditSourcesModal({
             onClick={handleSave}
             disabled={!canSave}
           >
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? t("loops.saving", "Saving...") : t("loops.save", "Save")}
           </Button>
           <Button
             variant="outline"
@@ -218,7 +228,7 @@ export function EditSourcesModal({
             onClick={() => onOpenChange(false)}
             disabled={disabled || isSaving}
           >
-            Cancel
+            {t("loops.cancel", "Cancel")}
           </Button>
         </div>
       </div>

@@ -1,18 +1,18 @@
 import React, { useMemo, useState } from "react";
 
-import { useCreateLoopMutation } from "src/entities/loop/api/loopApi";
+import { getErrorMessage } from "src/shared/lib";
+import { Button, Input, Modal } from "src/shared/ui";
+
+import { useCreateLoopMutation } from "../../api/loopApi";
 import {
   DEFAULT_CANONICAL_FILTERS,
   RECOMMENDED_PLATFORMS,
   normalizeRoleToTitles,
-} from "src/entities/loop/model";
-import { normalizeError } from "src/shared/lib/errors/normalizeError";
-import { Button, Input, Modal } from "src/shared/ui";
+} from "../../model";
 
 type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  userId: string;
   onCreated: (loopId: string) => void;
 };
 
@@ -44,14 +44,13 @@ function validate(form: CreateLoopForm): string | null {
 export function CreateLoopModal({
   open,
   onOpenChange,
-  userId,
   onCreated,
 }: Props) {
   const [createLoop, st] = useCreateLoopMutation();
 
   const initial = useMemo<CreateLoopForm>(
     () => ({ name: "My Loop", role: "", location: "Berlin" }),
-    []
+    [],
   );
 
   const [form, setForm] = useState<CreateLoopForm>(initial);
@@ -81,7 +80,6 @@ export function CreateLoopModal({
 
     try {
       const res = await createLoop({
-        userId,
         name,
         titles: normalizeRoleToTitles(role),
         location,
@@ -100,7 +98,7 @@ export function CreateLoopModal({
       onOpenChange(false);
       onCreated(res.id);
     } catch (e) {
-      setError(normalizeError(e));
+      setError(getErrorMessage(e));
     }
   }
 

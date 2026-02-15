@@ -12,7 +12,7 @@ import {
 
 export default function DashboardOptimizationPage() {
   const { t } = useTranslation(undefined, { keyPrefix: "dashboard" });
-  const { loops, loopsFilter, setLoopsFilter, matches } = useDashboardData();
+  const { loops, loopsFilter, setLoopsFilter } = useDashboardData();
 
   const [loopsModalOpen, setLoopsModalOpen] = useState(false);
 

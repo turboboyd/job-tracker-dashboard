@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 
-import type { LoopPlatform } from "src/entities/loop/model";
-import { PLATFORM_LABEL_BY_ID } from "src/entities/loop/model";
 import { Button } from "src/shared/ui";
+
+import { PLATFORM_LABEL_BY_ID } from "../../model";
+import type { LoopPlatform } from "../../model";
 
 export type ActiveLink = { platform: LoopPlatform; url: string } | null;
 

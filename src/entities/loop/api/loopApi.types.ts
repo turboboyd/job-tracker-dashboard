@@ -1,8 +1,7 @@
-import type { LoopMatchStatus, RemoteMode, LoopPlatform, CanonicalFilters } from "src/entities/loop/model";
+import type { RemoteMode, LoopPlatform, CanonicalFilters } from "src/entities/loop/model";
 
 
 export type CreateLoopInput = {
-  userId: string;
   name: string;
   titles: string[];
   location: string;
@@ -23,32 +22,4 @@ export type UpdateLoopInput = {
   platforms?: LoopPlatform[];
 
   filters?: CanonicalFilters;
-};
-
-export type CreateMatchInput = {
-  userId: string;
-  loopId: string;
-
-  title: string;
-  company: string;
-  location: string;
-
-  platform: LoopPlatform;
-  url: string;
-  description: string;
-
-  status: LoopMatchStatus;
-  matchedAt: string;
-};
-
-export type UpdateLoopMatchStatusInput = {
-  userId: string; 
-  matchId: string;
-  loopId: string;
-  status: LoopMatchStatus;
-};
-
-export type DeleteLoopMatchInput = {
-  matchId: string;
-  loopId: string;
 };

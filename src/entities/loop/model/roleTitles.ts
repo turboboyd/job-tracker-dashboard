@@ -1,3 +1,5 @@
+/* eslint-disable sonarjs/slow-regex */
+
 function uniq(arr: string[]) {
   const seen = new Set<string>();
   const out: string[] = [];

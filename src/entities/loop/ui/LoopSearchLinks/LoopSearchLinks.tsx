@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
-import { useUpdateLoopMutation } from "src/entities/loop/api/loopApi";
-import { mapWorkModeToRemoteMode, openUrl } from "src/entities/loop/lib";
-import type { LoopPlatform, Loop } from "src/entities/loop/model";
-import { normalizeRoleToTitles } from "src/entities/loop/model";
-import { AddMatchModal } from "src/entities/loop/ui/AddMatchModal/AddMatchModal";
-import { EditSourcesModal } from "src/entities/loop/ui/EditSourcesModal/EditSourcesModal";
-import { LoopSettingsModal } from "src/entities/loop/ui/LoopSettingsModal/LoopSettingsModal";
+import { clampPage } from "src/shared/lib";
 import { getErrorMessage } from "src/shared/lib/errors";
-import { usePagination } from "src/shared/lib/pagination/usePagination";
 import { Button, Pagination } from "src/shared/ui";
+
+import { useUpdateLoopMutation } from "../../api/loopApi";
+import { mapWorkModeToRemoteMode, openUrl } from "../../lib";
+import { normalizeRoleToTitles, type CanonicalFilters, type Loop, type LoopPlatform } from "../../model";
+import { AddMatchModal } from "../AddMatchModal/AddMatchModal";
+import { EditSourcesModal } from "../EditSourcesModal/EditSourcesModal";
+import { LoopSettingsModal } from "../LoopSettingsModal/LoopSettingsModal";
 
 import { PlatformLinkCard } from "./components/PlatformLinkCard";
 import type { LoopForLinks } from "./types";
@@ -28,22 +29,56 @@ type Props = {
     | "filters"
   >;
   userId: string | null;
+  page: number;
+  onPageChange: (page: number) => void;
 };
 
 
 
-export function LoopSearchLinks({ loop, userId }: Props) {
+function isNonEmptyString(x: unknown): x is string {
+  return typeof x === "string" && x.trim().length > 0;
+}
+
+function getSafeFilterString(
+  f: CanonicalFilters,
+  key: "role" | "location"
+): string {
+  const v = (f as unknown as Record<string, unknown>)[key];
+  return typeof v === "string" ? v : "";
+}
+
+function getSafeFilterNumber(f: CanonicalFilters, key: "radiusKm" | "postedWithin"): number {
+  const v = (f as unknown as Record<string, unknown>)[key];
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function getSafeFilterWorkMode(f: CanonicalFilters): string {
+  const v = (f as unknown as Record<string, unknown>)["workMode"];
+  return typeof v === "string" ? v : "any";
+}
+
+export function LoopSearchLinks({ loop, userId, page, onPageChange }: Props) {
+  const { t } = useTranslation();
   const [updateLoop, updateState] = useUpdateLoopMutation();
 
   const [isSourcesModalOpen, setIsSourcesModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAddMatchModalOpen, setIsAddMatchModalOpen] = useState(false);
-  const [defaultPlatform, setDefaultPlatform] = useState<
-    LoopPlatform | undefined
-  >(undefined);
+  const [defaultPlatform, setDefaultPlatform] = useState<LoopPlatform | undefined>(
+    undefined
+  );
 
-  const loopForState = loop as unknown as LoopForLinks;
 
+  const loopForState: LoopForLinks = {
+    id: loop.id,
+    titles: loop.titles,
+    location: loop.location ?? null,
+    radiusKm: loop.radiusKm ?? null,
+    platforms: loop.platforms,
+    remoteMode: loop.remoteMode,
+    filters: loop.filters, 
+  };
 
   const {
     draftFilters,
@@ -59,19 +94,25 @@ export function LoopSearchLinks({ loop, userId }: Props) {
   const isSaving = updateState.isLoading;
   const canEditSources = Boolean(userId) && !isSaving;
 
-  const linksPager = usePagination({
-    totalItems: links.length,
-    pageSize: 12,
-    resetKey: loop.id,
-  });
+  const pageSize = 12;
+  const totalPages = Math.max(1, Math.ceil(links.length / pageSize));
+  const safePage = Math.max(1, Math.min(totalPages, clampPage(page)));
+  const offset = (safePage - 1) * pageSize;
+
+  const info = useMemo(() => {
+    if (links.length === 0) return { from: 0, to: 0 };
+    const from = offset + 1;
+    const to = Math.min(links.length, offset + pageSize);
+    return { from, to };
+  }, [links.length, offset, pageSize]);
 
   const pagedLinks = useMemo(() => {
-    return links.slice(linksPager.offset, linksPager.offset + linksPager.limit);
-  }, [links, linksPager.offset, linksPager.limit]);
+    return links.slice(offset, offset + pageSize);
+  }, [links, offset, pageSize]);
 
   const handleApply = async () => {
     applyDraftFilters();
-    linksPager.setPage(1);
+    onPageChange(1);
 
     if (!userId) return;
 
@@ -94,16 +135,38 @@ export function LoopSearchLinks({ loop, userId }: Props) {
 
   const appliedBadges = useMemo(() => {
     const out: string[] = [];
-    if (appliedFilters.role.trim())
-      out.push(`Role: ${appliedFilters.role.trim()}`);
-    if (appliedFilters.location.trim())
-      out.push(`Loc: ${appliedFilters.location.trim()}`);
-    out.push(`Radius: ${appliedFilters.radiusKm}km`);
-    if (appliedFilters.workMode !== "any")
-      out.push(`Mode: ${appliedFilters.workMode}`);
-    out.push(`Posted: ${appliedFilters.postedWithin}d`);
+
+    const role = getSafeFilterString(appliedFilters, "role").trim();
+    const location = getSafeFilterString(appliedFilters, "location").trim();
+    const radiusKm = getSafeFilterNumber(appliedFilters, "radiusKm");
+    const workMode = getSafeFilterWorkMode(appliedFilters);
+    const postedWithin = getSafeFilterNumber(appliedFilters, "postedWithin");
+
+    if (isNonEmptyString(role)) out.push(t("loops.badgeRole", "Role: {{value}}", { value: role }));
+    if (isNonEmptyString(location))
+      out.push(t("loops.badgeLoc", "Loc: {{value}}", { value: location }));
+
+    out.push(
+      t("loops.badgeRadius", "Radius: {{value}}km", {
+        value: radiusKm,
+      })
+    );
+
+    if (workMode !== "any")
+      out.push(
+        t("loops.badgeMode", "Mode: {{value}}", {
+          value: workMode,
+        })
+      );
+
+    out.push(
+      t("loops.badgePosted", "Posted: {{value}}d", {
+        value: postedWithin,
+      })
+    );
+
     return out;
-  }, [appliedFilters]);
+  }, [appliedFilters, t]);
 
   const openAddModal = (platform?: LoopPlatform) => {
     setDefaultPlatform(platform);
@@ -126,7 +189,7 @@ export function LoopSearchLinks({ loop, userId }: Props) {
         onApply={handleApply}
         onReset={() => {
           resetFilters();
-          linksPager.setPage(1);
+          onPageChange(1);
         }}
       />
 
@@ -135,18 +198,23 @@ export function LoopSearchLinks({ loop, userId }: Props) {
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-base font-semibold text-foreground">
-                Search links
+                {t("loops.searchLinksTitle", "Search links")}
               </h3>
 
               <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                Showing {linksPager.info.from}–{linksPager.info.to} of{" "}
-                {links.length}
+                {t("loops.showing", "Showing {{from}}–{{to}} of {{total}}", {
+                  from: info.from,
+                  to: info.to,
+                  total: links.length,
+                })}
               </span>
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Apply filters → open platform → pick a job → paste URL → save
-              match.
+              {t(
+                "loops.searchLinksSubtitle",
+                "Apply filters → open platform → pick a job → paste URL → save match."
+              )}
             </p>
 
             {appliedBadges.length ? (
@@ -170,7 +238,7 @@ export function LoopSearchLinks({ loop, userId }: Props) {
               onClick={() => setIsSettingsOpen(true)}
               disabled={isSaving}
             >
-              My Loop settings
+              {t("loops.myLoopSettings", "My Loop settings")}
             </Button>
 
             <Button
@@ -179,7 +247,7 @@ export function LoopSearchLinks({ loop, userId }: Props) {
               onClick={() => setIsSourcesModalOpen(true)}
               disabled={!canEditSources}
             >
-              Edit sources
+              {t("loops.editSources", "Edit sources")}
             </Button>
 
             <Button
@@ -189,7 +257,7 @@ export function LoopSearchLinks({ loop, userId }: Props) {
               onClick={() => openAddModal(undefined)}
               disabled={!userId}
             >
-              Add match
+              {t("loops.addMatch", "Add match")}
             </Button>
           </div>
 
@@ -206,10 +274,7 @@ export function LoopSearchLinks({ loop, userId }: Props) {
                   platforms: nextPlatforms,
                 }).unwrap();
               } catch (err) {
-                console.error(
-                  "Failed to update sources:",
-                  getErrorMessage(err)
-                );
+                console.error("Failed to update sources:", getErrorMessage(err));
               }
             }}
           />
@@ -218,12 +283,11 @@ export function LoopSearchLinks({ loop, userId }: Props) {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {pagedLinks.map((link) => {
             const isActive =
-              activeLink?.platform === link.platform &&
-              activeLink?.url === link.url;
+              activeLink?.platform === link.platform && activeLink?.url === link.url;
 
             return (
               <PlatformLinkCard
-                key={link.platform}
+                key={`${link.platform}:${link.url}`}
                 platform={link.platform}
                 url={link.url}
                 isActive={isActive}
@@ -237,9 +301,9 @@ export function LoopSearchLinks({ loop, userId }: Props) {
 
         <div className="flex items-center justify-center">
           <Pagination
-            page={linksPager.page}
-            totalPages={linksPager.totalPages}
-            onPageChange={linksPager.setPage}
+            page={safePage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
             disabled={isSaving}
           />
         </div>
@@ -247,7 +311,6 @@ export function LoopSearchLinks({ loop, userId }: Props) {
         <AddMatchModal
           open={isAddMatchModalOpen}
           onOpenChange={setIsAddMatchModalOpen}
-          userId={userId}
           loopId={loop.id}
           defaultPlatform={defaultPlatform}
         />
