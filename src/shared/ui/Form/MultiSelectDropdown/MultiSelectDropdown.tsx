@@ -113,7 +113,7 @@ function SelectedChips<T extends string>(props: {
 
 function DropdownPanel<T extends string>(props: {
   open: boolean;
-  panelRef: React.RefObject<HTMLDivElement | null>;
+  panelRef: React.RefObject<HTMLDivElement>;
   searchable: boolean;
   query: string;
   onQueryChange: (q: string) => void;
