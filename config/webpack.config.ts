@@ -7,6 +7,16 @@ import { buildPlugins } from "./webpack/buildPlugins";
 import { buildOptimization } from "./webpack/buildOptimization";
 import { buildDevServer } from "./webpack/buildDevServer";
 
+function getPublicPath(): string {
+  const fromEnv = process.env.PUBLIC_URL?.trim();
+  if (fromEnv) return `${fromEnv.replace(/\/$/, "")}/`;
+
+  const repo = process.env.GITHUB_REPOSITORY?.split("/")[1];
+  if (process.env.GITHUB_ACTIONS === "true" && repo) return `/${repo}/`;
+
+  return "/";
+}
+
 export default (_env: unknown, argv: { mode?: BuildMode }): Configuration => {
   const mode: BuildMode = argv.mode ?? "development";
   const isProd = mode === "production";
@@ -23,6 +33,8 @@ export default (_env: unknown, argv: { mode?: BuildMode }): Configuration => {
     },
   };
 
+  const publicPath = getPublicPath();
+
   return {
     mode,
 
@@ -36,9 +48,7 @@ export default (_env: unknown, argv: { mode?: BuildMode }): Configuration => {
       chunkFilename: isProd
         ? "assets/js/[name].[contenthash:8].chunk.js"
         : "assets/js/[name].chunk.js",
-      publicPath: process.env.PUBLIC_URL
-        ? `${process.env.PUBLIC_URL.replace(/\/$/, "")}/`
-        : "/",
+      publicPath,
       clean: true,
     },
 

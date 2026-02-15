@@ -17,12 +17,8 @@ if (!container) throw new Error("Root element #root not found");
 store.dispatch(initAuthListener());
 
 
-const isGithubPages =
-  typeof window !== "undefined" &&
-  window.location.hostname.endsWith("github.io");
-
-const basename = isGithubPages ? "/job-tracker-dashboard" : "/";
-console.log("🚀 ~ basename:", basename)
+const rawBase = (process.env.PUBLIC_URL ?? "").trim();
+const basename = rawBase ? rawBase.replace(/\/$/, "") : "/";
 
 createRoot(container).render(
   <React.StrictMode>
