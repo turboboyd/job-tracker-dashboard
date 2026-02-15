@@ -1,8 +1,11 @@
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { AppRoutes, RoutePath } from "src/app/providers/router/routeConfig/routeConfig";
-import { useAuthSelectors } from "src/features/auth";
+import {
+  AppRoutes,
+  RoutePath,
+} from "src/app/providers/router/routeConfig/routeConfig";
+import { useAuthSelectors } from "src/entities/auth";
 import { LinkButton } from "src/shared/ui";
 
 import {
@@ -15,6 +18,7 @@ import {
   FooterNote,
 } from "./components";
 import type { CtaBlock } from "./components";
+
 
 const MainPage: React.FC = () => {
   const { t } = useTranslation();

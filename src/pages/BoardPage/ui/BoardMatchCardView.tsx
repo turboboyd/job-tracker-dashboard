@@ -76,6 +76,15 @@ export function BoardMatchCardView({
   const onOpen = React.useCallback(() => {
     if (!busy && !overlay) setOpen(true);
   }, [busy, overlay]);
+  let cursorClass: string;
+
+  if (overlay) {
+    cursorClass = "cursor-grabbing";
+  } else if (busy) {
+    cursorClass = "opacity-60 cursor-not-allowed";
+  } else {
+    cursorClass = "cursor-grab";
+  }
 
   return (
     <>
@@ -88,11 +97,7 @@ export function BoardMatchCardView({
         }}
         className={classNames(
           "rounded-xl outline-none",
-          overlay
-            ? "cursor-grabbing"
-            : busy
-              ? "opacity-60 cursor-not-allowed"
-              : "cursor-grab",
+          cursorClass,
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         )}
       >

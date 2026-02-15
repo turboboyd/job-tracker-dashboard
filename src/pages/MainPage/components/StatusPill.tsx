@@ -9,12 +9,15 @@ type Props = {
 };
 
 export const StatusPill: React.FC<Props> = ({ label, tone, className }) => {
-  const toneClass =
-    tone === "success"
-      ? "bg-success text-success-foreground"
-      : tone === "warning"
-      ? "bg-warning text-warning-foreground"
-      : "bg-info text-info-foreground";
+  let toneClass: string;
+
+  if (tone === "success") {
+    toneClass = "bg-success text-success-foreground";
+  } else if (tone === "warning") {
+    toneClass = "bg-warning text-warning-foreground";
+  } else {
+    toneClass = "bg-info text-info-foreground";
+  }
 
   return (
     <span
