@@ -22,6 +22,7 @@ const isGithubPages =
   window.location.hostname.endsWith("github.io");
 
 const basename = isGithubPages ? "/job-tracker-dashboard" : "/";
+console.log("🚀 ~ basename:", basename)
 
 createRoot(container).render(
   <React.StrictMode>
