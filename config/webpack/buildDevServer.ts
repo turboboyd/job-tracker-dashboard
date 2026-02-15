@@ -1,7 +1,19 @@
 import type { Configuration as DevServerConfiguration } from "webpack-dev-server";
 import type { BuildOptions } from "./types";
 
+function getPublicPath(): string {
+  const fromEnv = process.env.PUBLIC_URL?.trim();
+  if (fromEnv) return `${fromEnv.replace(/\/$/, "")}/`;
+
+  const repo = process.env.GITHUB_REPOSITORY?.split("/")[1];
+  if (process.env.GITHUB_ACTIONS === "true" && repo) return `/${repo}/`;
+
+  return "/";
+}
+
 export function buildDevServer(options: BuildOptions): DevServerConfiguration {
+  const publicPath = getPublicPath();
+
   return {
     port: 3000,
     hot: true,
@@ -9,7 +21,7 @@ export function buildDevServer(options: BuildOptions): DevServerConfiguration {
     historyApiFallback: true,
     static: {
       directory: options.paths.public,
-      publicPath: process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL.replace(/\/$/, "")}/` : "/",
+      publicPath,
       watch: true,
     },
     client: {
