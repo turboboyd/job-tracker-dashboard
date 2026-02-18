@@ -3,7 +3,7 @@ import { useAppSelector } from "src/app/store/hooks";
 import {
   selectAuthDisplayName,
   selectAuthEmail,
-  selectAuthError,
+  selectAuthErrorObject,
   selectAuthLoading,
   selectAuthPhotoURL,
   selectAuthReady,
@@ -24,6 +24,6 @@ export function useAuthSelectors() {
     photoURL: useAppSelector(selectAuthPhotoURL),
 
     isLoading: useAppSelector(selectAuthLoading),
-    error: useAppSelector(selectAuthError),
+    error: useAppSelector(selectAuthErrorObject),
   };
 }

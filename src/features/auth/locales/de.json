@@ -3,7 +3,7 @@
   "loginSubtitle": "Melde dich an, um fortzufahren",
   "registerTitle": "Konto erstellen",
   "registerSubtitle": "Starte mit deiner Jobsuche",
-  "email": "E‑Mail",
+  "email": "E-Mail",
   "password": "Passwort",
   "confirmPassword": "Passwort bestätigen",
   "passwordHint": "Mindestens 6 Zeichen",
@@ -15,6 +15,23 @@
   "haveAccount": "Du hast bereits ein Konto?",
   "or": "oder",
   "errorTitle": "Etwas ist schiefgelaufen",
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "googleGeneric": "Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+    "signinGeneric": "Anmeldung fehlgeschlagen. Bitte prüfe deine Angaben und versuche es erneut.",
+    "signupGeneric": "Konto konnte nicht erstellt werden. Bitte versuche es erneut.",
+    "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "wrongPassword": "E-Mail oder Passwort ist falsch.",
+    "userNotFound": "Kein Konto mit dieser E-Mail gefunden.",
+    "emailAlreadyInUse": "Diese E-Mail wird bereits verwendet. Bitte melde dich an.",
+    "weakPassword": "Passwort ist zu schwach. Verwende mindestens 6 Zeichen.",
+    "tooManyRequests": "Zu viele Versuche. Bitte versuche es später erneut.",
+    "network": "Netzwerkfehler. Bitte prüfe deine Verbindung.",
+    "operationNotAllowed": "Diese Anmeldemethode ist derzeit deaktiviert.",
+    "popupClosedByUser": "Google-Anmeldung wurde abgebrochen.",
+    "cancelledPopupRequest": "Google-Anmeldung läuft bereits.",
+    "popupBlocked": "Popup wurde blockiert. Bitte Popups erlauben und erneut versuchen."
+  },
   "emailPassword": {
     "continue": "Weiter",
     "createAccount": "Konto erstellen",
@@ -32,8 +49,8 @@
     "signingOut": "Abmelden…"
   },
   "validation": {
-    "emailInvalid": "Gib eine gültige E‑Mail-Adresse ein",
-    "emailRequired": "E‑Mail ist erforderlich",
+    "emailInvalid": "Gib eine gültige E-Mail-Adresse ein",
+    "emailRequired": "E-Mail ist erforderlich",
     "passwordMin": "Passwort muss mindestens 6 Zeichen haben",
     "passwordRequired": "Passwort ist erforderlich",
     "passwordsMustMatch": "Passwörter müssen übereinstimmen",

@@ -7,7 +7,7 @@ import {
   createRegisterSchema,
   type RegisterValues,
 } from "src/entities/auth/model/validation";
-import { FormikInputField, InlineError } from "src/shared/ui";
+import { FormikInputField } from "src/shared/ui";
 
 import { mapFirebaseAuthError } from "../../lib/firebaseAuthErrors";
 import { AuthFormShell } from "../AuthFormShell";
@@ -23,15 +23,11 @@ const initialValues: RegisterValues = {
   confirmPassword: "",
 };
 
-const AUTH_CODE_EMAIL_ALREADY_IN_USE = "auth/email-already-in-use";
-
-// eslint-disable-next-line sonarjs/no-hardcoded-passwords -- Firebase auth error code
-const AUTH_CODE_WEAK_PASSWORD = "auth/weak-password";
-
 const REGISTER_ERROR_OVERRIDES: Record<string, string> = {
-  [AUTH_CODE_EMAIL_ALREADY_IN_USE]: "auth.errors.emailAlreadyInUse",
-  // eslint-disable-next-line sonarjs/no-hardcoded-passwords -- i18n translation key, not a credential 
-  [AUTH_CODE_WEAK_PASSWORD]: "auth.errors.weakPassword",
+  "auth/email-already-in-use": "auth.errors.emailAlreadyInUse",
+  // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+  "auth/weak-password": "auth.errors.weakPassword",
+  "auth/invalid-email": "auth.errors.invalidEmail",
 };
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
@@ -43,7 +39,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const schema = useMemo(() => createRegisterSchema(t), [t]);
 
   return (
-    <AuthFormShell googleButtonProps={{ onSuccess }}>
+    <AuthFormShell
+      googleButtonProps={{ onSuccess }}
+      topError={
+        error ? mapFirebaseAuthError(error, t, REGISTER_ERROR_OVERRIDES) : null
+      }
+    >
       <Formik<RegisterValues>
         initialValues={initialValues}
         validationSchema={schema}
@@ -56,16 +57,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         }}
       >
         {(f) => {
-          const commonError = error
-            ? mapFirebaseAuthError(error, t, REGISTER_ERROR_OVERRIDES)
-            : undefined;
-
           const disabled = f.isSubmitting || isLoading;
 
           return (
             <form onSubmit={f.handleSubmit} className="space-y-4">
-              {commonError ? <InlineError message={commonError} /> : null}
-
               <div className="grid grid-cols-1 gap-4">
                 <FormikInputField
                   formik={f}

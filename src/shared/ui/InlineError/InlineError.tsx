@@ -1,28 +1,25 @@
+import React from "react";
 
-import { classNames } from "src/shared/lib";
-
-type Props = {
+type InlineErrorProps = {
   title?: string;
   message: string;
   className?: string;
 };
 
-export function InlineError({ title = "Error", message, className }: Props) {
+export const InlineError: React.FC<InlineErrorProps> = ({
+  title,
+  message,
+  className,
+}) => {
   return (
     <div
-      className={classNames(
-        "rounded-xl border border-border bg-card p-md shadow-sm",
-        "text-foreground",
-        className
-      )}
-      role="alert"
+      className={["rounded-xl border border-red-300 bg-red-50 p-4", className]
+        .filter(Boolean)
+        .join(" ")}
     >
-      <div className="text-sm font-semibold text-foreground leading-tight">
-        {title}
-      </div>
-      <div className="mt-1 text-sm text-muted-foreground leading-normal">
-        {message}
-      </div>
+      {title && <div className="mb-1 font-semibold text-red-700">{title}</div>}
+
+      <div className="text-sm text-red-600">{message}</div>
     </div>
   );
-}
+};

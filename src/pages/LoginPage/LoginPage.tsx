@@ -7,6 +7,7 @@ import {
   RoutePath,
 } from "src/app/providers/router/routeConfig/routeConfig";
 import { useAuthSelectors } from "src/entities/auth";
+import { useAuthActions } from "src/entities/auth";
 import { AuthPageShell, LoginForm } from "src/features/auth";
 import {
   type AuthRedirectLocationState,
@@ -16,6 +17,7 @@ import {
 const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const { isAuthenticated, isAuthReady } = useAuthSelectors();
+  const { clearAuthError } = useAuthActions();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +25,10 @@ const LoginPage: React.FC = () => {
   const from = getAuthRedirectFrom(
     location.state as AuthRedirectLocationState | null,
   );
+
+  useEffect(() => {
+    clearAuthError();
+  }, [clearAuthError]);
 
   useEffect(() => {
     if (isAuthReady && isAuthenticated) {
