@@ -148,8 +148,7 @@ export function DonutChart({
       <div className="text-sm font-semibold text-foreground leading-tight">
         {title}
       </div>
-
-      <div className="mt-lg flex items-center gap-lg">
+      <div className="mt-lg flex flex-col items-stretch gap-lg 2xl:flex-row 2xl:items-center">
         <motion.div
           className="relative shrink-0"
           style={{ width: outer, height: outer }}
@@ -188,10 +187,6 @@ export function DonutChart({
               segmentsForRender.map((seg) => {
                 const isActive = activeKey === seg.label;
 
-                // We intentionally render slice colors via explicit `stroke`
-                // values (derived from the provided className) to avoid cases
-                // where Tailwind config does not generate certain `stroke-*`
-                // utilities (e.g. red/violet) and the segment becomes invisible.
                 const segStroke = strokeColorFromClass(seg.className);
 
                 let segOpacity = 1;
@@ -329,51 +324,57 @@ export function DonutChart({
         </motion.div>
 
         {/* Legend */}
-        <div className="min-w-0 flex-1 space-y-2">
-          {slices.map((s, idx) => {
-            const isLegendActive = active?.label === s.label && s.value > 0;
+        <div className="min-w-0 flex-1">
+          {/*
+            Mobile (<=sm): legend goes UNDER the chart and becomes a compact 2-col grid.
+            Desktop (>=sm): legend is on the RIGHT side as a vertical list.
+          */}
+          <div className="grid grid-cols-2 gap-2 2xl:flex 2xl:flex-col 2xl:gap-2">
+            {slices.map((s, idx) => {
+              const isLegendActive = active?.label === s.label && s.value > 0;
 
-            return (
-              <div
-                key={s.label}
-                className={[
-                  "flex items-center justify-between gap-sm rounded-md px-sm py-1",
-                  "transition-colors duration-fast ease-ease-out",
-                  isLegendActive ? "bg-muted/50" : "",
-                ].join(" ")}
-                onMouseEnter={() => setActiveKey(s.value > 0 ? s.label : null)}
-                onMouseLeave={() => setActiveKey(null)}
-              >
-                <div className="flex min-w-0 items-center gap-sm">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: strokeColorFromClass(s.className) }}
-                  />
-                  <span className="truncate text-sm text-foreground leading-normal">
-                    {s.label}
-                  </span>
-                </div>
-
-                <motion.span
-                  className="text-sm text-muted-foreground leading-normal"
-                  initial={animateOnMount ? { opacity: 0, y: 2 } : undefined}
-                  animate={animateOnMount ? { opacity: 1, y: 0 } : undefined}
-                  transition={{ duration: 0.25, delay: idx * 0.04 }}
+              return (
+                <div
+                  key={s.label}
+                  className={[
+                    "flex items-center justify-between gap-sm rounded-md px-sm py-1",
+                    "transition-colors duration-fast ease-ease-out",
+                    isLegendActive ? "bg-muted/50" : "",
+                  ].join(" ")}
+                  onMouseEnter={() => setActiveKey(s.value > 0 ? s.label : null)}
+                  onMouseLeave={() => setActiveKey(null)}
                 >
-                  {s.value}
-                </motion.span>
-              </div>
-            );
-          })}
+                  <div className="flex min-w-0 items-center gap-sm">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: strokeColorFromClass(s.className) }}
+                    />
+                    <span className="truncate text-sm text-foreground leading-normal">
+                      {s.label}
+                    </span>
+                  </div>
 
-          <div className="pt-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground leading-normal">
-                {totalLabel}
-              </span>
-              <span className="text-xs text-muted-foreground leading-normal">
-                {total}
-              </span>
+                  <motion.span
+                    className="text-sm text-muted-foreground leading-normal"
+                    initial={animateOnMount ? { opacity: 0, y: 2 } : undefined}
+                    animate={animateOnMount ? { opacity: 1, y: 0 } : undefined}
+                    transition={{ duration: 0.25, delay: idx * 0.04 }}
+                  >
+                    {s.value}
+                  </motion.span>
+                </div>
+              );
+            })}
+
+            <div className="col-span-2 pt-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground leading-normal">
+                  {totalLabel}
+                </span>
+                <span className="text-xs text-muted-foreground leading-normal">
+                  {total}
+                </span>
+              </div>
             </div>
           </div>
         </div>
