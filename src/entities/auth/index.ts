@@ -1,3 +1,5 @@
+export { selectAuthErrorObject } from "./model/authSelectors";
+
 export {
   createLoginSchema,
   createRegisterSchema,
@@ -21,6 +23,7 @@ export {
   selectAuthLoading,
   selectAuthError,
   selectAuthErrorCode,
+
   initAuthListener,
   stopAuthListener,
   signInWithGoogle,

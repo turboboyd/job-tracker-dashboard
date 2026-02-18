@@ -4,12 +4,18 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { AppRoutes, RoutePath } from "src/app/providers/router/routeConfig/routeConfig";
 import { useAuthSelectors } from "src/entities/auth";
+import { useAuthActions } from "src/entities/auth";
 import { AuthPageShell, RegisterForm } from "src/features/auth/ui";
 
 const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
   const { isAuthenticated, isAuthReady } = useAuthSelectors();
+  const { clearAuthError } = useAuthActions();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    clearAuthError();
+  }, [clearAuthError]);
 
   useEffect(() => {
     if (isAuthReady && isAuthenticated) {

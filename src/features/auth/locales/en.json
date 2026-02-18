@@ -15,6 +15,23 @@
   "haveAccount": "Already have an account?",
   "or": "or",
   "errorTitle": "Something went wrong",
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "googleGeneric": "Google sign-in failed. Please try again.",
+    "signinGeneric": "Couldn't sign in. Please check your details and try again.",
+    "signupGeneric": "Couldn't create an account. Please try again.",
+    "invalidEmail": "Enter a valid email address.",
+    "wrongPassword": "Incorrect email or password.",
+    "userNotFound": "No account found with this email.",
+    "emailAlreadyInUse": "This email is already in use. Try signing in instead.",
+    "weakPassword": "Password is too weak. Use at least 6 characters.",
+    "tooManyRequests": "Too many attempts. Please try again later.",
+    "network": "Network error. Check your connection and try again.",
+    "operationNotAllowed": "This sign-in method is currently disabled.",
+    "popupClosedByUser": "Google sign-in was cancelled.",
+    "cancelledPopupRequest": "Google sign-in is already in progress.",
+    "popupBlocked": "Popup was blocked. Allow popups and try again."
+  },
   "emailPassword": {
     "continue": "Continue",
     "createAccount": "Create account",

@@ -1,11 +1,5 @@
 import type { AuthState } from "./authTypes";
 
-/**
- * Minimal store shape required by auth selectors.
- *
- * This keeps the auth model independent from the app store implementation
- * while still being compatible with a full RootState.
- */
 export type StateWithAuth = {
   auth: AuthState;
 };
@@ -37,3 +31,6 @@ export const selectAuthError = (state: StateWithAuth) =>
 
 export const selectAuthErrorCode = (state: StateWithAuth) =>
   state.auth.error?.code ?? null;
+
+// Prefer this selector in UI that needs both code and message.
+export const selectAuthErrorObject = (state: StateWithAuth) => state.auth.error;

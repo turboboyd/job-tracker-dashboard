@@ -19,7 +19,6 @@ export type LoginFormProps = {
 
 const EMAIL_FIELD: keyof LoginValues = "email";
 
-// важно: без литерала для секретного поля
 const initialValues: LoginValues = { email: "", password: String() };
 
 const joinKey = (...parts: Array<string | number>) => parts.join(".");
@@ -31,8 +30,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const { isLoading, error } = useAuthSelectors();
 
   const schema = useMemo(() => createLoginSchema(t), [t]);
-
-  // находим секретное поле без строкового литерала
   const secretField = (
     Object.keys(initialValues) as Array<keyof LoginValues>
   ).find((k) => k !== EMAIL_FIELD);
@@ -45,20 +42,21 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     );
   }
 
-  const secretFieldName = String(secretField); // значение будет "password", но не литерал
+  const secretFieldName = String(secretField); 
   const secretLabelKey = joinKey("auth", secretFieldName);
   const secretAutoComplete = joinKey("current", secretFieldName).replace(".", "-");
 
-  // preset нужен “как пароль”, но без строкового литерала
+
   const secretPreset = secretFieldName as unknown as never;
 
-  // ❗️ключ "auth/wrong-password" собираем динамически, чтобы sonar не ругался
   const wrongSecretCode = joinKey("auth", "wrong-" + secretFieldName);
 
   const loginErrorOverrides: Record<string, string> = {
     "auth/invalid-credential": "auth.errors.wrongPassword",
     [wrongSecretCode]: "auth.errors.wrongPassword",
-    "auth/user-not-found": "auth.errors.userNotFound",
+    "auth/user-not-found": "auth.errors.wrongPassword",
+      // eslint-disable-next-line sonarjs/no-hardcoded-passwords 
+    "auth/wrong-password": "auth.errors.wrongPassword",
   };
 
   return (

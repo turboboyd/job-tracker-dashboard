@@ -14,7 +14,20 @@
   "noAccount": "Нет аккаунта?",
   "haveAccount": "Уже есть аккаунт?",
   "or": "или",
-  "errorTitle": "Что-то пошло не так",
+ "errorTitle": "Что-то пошло не так",
+  "errors": {
+    "invalid-credential": "ffff",
+    "wrongPassword": "Неверный email или пароль.",
+    "userNotFound": "Аккаунт с таким email не найден.",
+    "emailAlreadyInUse": "Этот email уже используется. Попробуйте войти.",
+    "invalidEmail": "Введите корректный email.",
+    "weakPassword": "Слишком простой пароль. Используйте минимум 6 символов.",
+    "tooManyRequests": "Слишком много попыток. Попробуйте позже.",
+    "network": "Ошибка сети. Проверьте подключение и попробуйте ещё раз.",
+    "operationNotAllowed": "Этот способ входа сейчас отключён.",
+    "googleGeneric": "Не удалось войти через Google. Попробуйте ещё раз.",
+    "generic": "Не удалось выполнить действие. Попробуйте ещё раз."
+  },
   "emailPassword": {
     "continue": "Продолжить",
     "createAccount": "Создать аккаунт",

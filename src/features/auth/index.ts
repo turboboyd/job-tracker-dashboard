@@ -33,5 +33,5 @@ export type { AuthFormShellProps } from "./ui/AuthFormShell";
 
 export {
   mapFirebaseAuthError,
-  mapGoogleAuthError,
+
 } from "./lib/firebaseAuthErrors";
