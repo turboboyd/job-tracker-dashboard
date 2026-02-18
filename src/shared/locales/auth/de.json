@@ -38,5 +38,21 @@
     "passwordRequired": "Passwort ist erforderlich",
     "passwordsMustMatch": "Passwörter müssen übereinstimmen",
     "confirmPasswordRequired": "Bitte bestätige dein Passwort"
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "unknown": "Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.",
+    "googleGeneric": "Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+    "invalidEmail": "Bitte gib eine gültige E-Mail-Adresse ein.",
+    "tooManyRequests": "Zu viele Versuche. Bitte versuche es später erneut.",
+    "network": "Netzwerkfehler. Bitte prüfe deine Verbindung und versuche es erneut.",
+    "operationNotAllowed": "Diese Anmeldemethode ist derzeit deaktiviert.",
+    "popupClosedByUser": "Google-Anmeldung wurde abgebrochen.",
+    "cancelledPopupRequest": "Google-Anmeldung läuft bereits.",
+    "popupBlocked": "Popup wurde blockiert. Bitte Popups erlauben und erneut versuchen.",
+    "wrongPassword": "E‑Mail oder Passwort ist falsch.",
+    "userNotFound": "E‑Mail oder Passwort ist falsch.",
+    "emailAlreadyInUse": "Diese E‑Mail wird bereits verwendet. Bitte melde dich an.",
+    "weakPassword": "Passwort ist zu schwach. Verwende mindestens 6 Zeichen."
   }
 }

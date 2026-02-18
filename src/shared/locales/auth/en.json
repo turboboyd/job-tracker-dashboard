@@ -38,5 +38,21 @@
     "passwordRequired": "Password is required",
     "passwordsMustMatch": "Passwords must match",
     "confirmPasswordRequired": "Please confirm your password"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unknown": "An unknown error occurred. Please try again.",
+    "googleGeneric": "Google sign-in failed. Please try again.",
+    "invalidEmail": "Enter a valid email address.",
+    "tooManyRequests": "Too many attempts. Please try again later.",
+    "network": "Network error. Check your connection and try again.",
+    "operationNotAllowed": "This sign-in method is currently disabled.",
+    "popupClosedByUser": "Google sign-in was cancelled.",
+    "cancelledPopupRequest": "Google sign-in is already in progress.",
+    "popupBlocked": "Popup was blocked. Allow popups and try again.",
+    "wrongPassword": "Incorrect email or password.",
+    "userNotFound": "Incorrect email or password.",
+    "emailAlreadyInUse": "This email is already in use. Try signing in instead.",
+    "weakPassword": "Password is too weak. Use at least 6 characters."
   }
 }
