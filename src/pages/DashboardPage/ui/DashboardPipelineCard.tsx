@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DonutChart } from "src/shared/ui";
@@ -22,19 +22,31 @@ type Props = {
 
 export function DashboardPipelineCard({
   summary,
-  size = 240,
-  stroke = 16,
+  size,
+  stroke,
 }: Props) {
-  const { t } = useTranslation(undefined, { keyPrefix: "dashboard" });
+   const { t } = useTranslation(undefined, { keyPrefix: "dashboard" });
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [vw, setVw] = useState<number>(() => {
+    if (typeof window === "undefined") return 1024;
+    return window.innerWidth;
+  });
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  const computed = useMemo(() => {
+    if (vw <= 360) return { size: 200, stroke: 14 };
+    if (vw <= 640) return { size: 220, stroke: 15 };
+    return { size: 240, stroke: 16 };
+  }, [vw]);
+
+  const donutSize = size ?? computed.size;
+  const donutStroke = stroke ?? computed.stroke;
+
 
   const inPipeline =
     summary.new +
@@ -43,14 +55,8 @@ export function DashboardPipelineCard({
     summary.offer +
     summary.rejected;
 
-  const responsiveSize = isMobile ? 200 : size;
-  const responsiveStroke = isMobile ? 14 : stroke;
-
   return (
-    <Card
-      padding="md"
-      className="rounded-3xl p-4 sm:p-6"
-    >
+    <Card padding="md" className="rounded-3xl p-4 sm:p-6">
       <div className="flex justify-center">
         <DonutChart
           title={t("pipeline.title", "Applications pipeline")}
@@ -59,8 +65,8 @@ export function DashboardPipelineCard({
           centerBottom={t("pipeline.centerBottom", "of {{total}} total", {
             total: summary.total,
           })}
-          size={responsiveSize}
-          stroke={responsiveStroke}
+          size={donutSize}
+          stroke={donutStroke}
           slices={[
             {
               label: t("status.new", "New"),
