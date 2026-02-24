@@ -198,6 +198,16 @@ export const ApplicationsPage = lazyPage(
     de: await import("./ApplicationsPage/locales/de.json"),
   }),
 );
+export const ApplicationDetailsPage = lazyPage(
+  () => import("./ApplicationDetailsPage/ApplicationDetailsPage"),
+  "applicationDetails",
+  async () => ({
+    en: await import("./ApplicationDetailsPage/locales/en.json"),
+    ru: await import("./ApplicationDetailsPage/locales/ru.json"),
+    de: await import("./ApplicationDetailsPage/locales/de.json"),
+  }),
+);
+
 
 export const QuestionsPage = lazyPage(
   () => import("./QuestionsPage/QuestionsPage"),

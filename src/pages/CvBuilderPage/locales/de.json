@@ -1,4 +1,23 @@
 {
-  "title": "CV-Builder",
-  "subtitle": "Kommt bald. Erstelle einen sauberen Lebenslauf aus deinem Profil und exportiere ihn."
+  "cvBuilder": {
+    "title": "CV Builder",
+    "subtitle": "Lade CV-Versionen hoch und verknüpfe sie mit Bewerbungen.",
+    "upload": {
+      "title": "CV hochladen",
+      "file": "Datei",
+      "label": "Label",
+      "labelPh": "z. B. Frontend CV v3",
+      "notes": "Notizen",
+      "notesPh": "Optional…",
+      "upload": "Hochladen",
+      "uploading": "Wird hochgeladen…"
+    },
+    "list": {
+      "title": "CV-Versionen",
+      "refresh": "Aktualisieren",
+      "loading": "Laden…",
+      "empty": "Noch keine CV-Versionen.",
+      "open": "Öffnen"
+    }
+  }
 }
