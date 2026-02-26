@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkjob_tracker_dashboard=self.webpackChunkjob_tracker_dashboard||[]).push([[1634],{31634(a){a.exports=JSON.parse('{"applicationsPage":{"title":"Applications page"}}')}}]);
