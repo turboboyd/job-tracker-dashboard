@@ -15,6 +15,30 @@ export type ProcessStatus =
   | "REJECTED"
   | "NO_RESPONSE";
 
+/**
+ * New scalable workflow model (stage + subStatus).
+ * Kept optional for backwards compatibility while the UI is migrated.
+ */
+export type ProcessStage =
+  | "ACTIVE"
+  | "INTERVIEW"
+  | "OFFER"
+  | "HIRED"
+  | "REJECTED"
+  | "NO_RESPONSE"
+  | "ARCHIVED";
+
+// Sub-status values can evolve, so we keep them as plain strings.
+
+export type AppliedVia =
+  | "company_site"
+  | "linkedin"
+  | "indeed"
+  | "stepstone"
+  | "email"
+  | "referral"
+  | "other";
+
 export type HistoryType =
   | "STATUS_CHANGE"
   | "FIELD_CHANGE"
@@ -142,7 +166,22 @@ export type ApplicationDoc = {
 
   process: {
     status: ProcessStatus;
+    /**
+     * Scalable model (optional): stage + subStatus
+     * stage = big phase, subStatus = concrete current step.
+     */
+    stage?: ProcessStage;
+    subStatus?: string;
+
     lastStatusChangeAt: Timestamp;
+
+    /**
+     * When application was actually submitted.
+     * Used for client-side "ghosting after N days" automation.
+     */
+    appliedAt?: Timestamp;
+    appliedVia?: AppliedVia;
+
     nextActionAt?: Timestamp;
     nextActionText?: string;
     contactAttempts: number;
@@ -166,6 +205,30 @@ export type ApplicationDoc = {
     roleFingerprint?: string;
   };
 
+  /**
+   * Optional linkage to a "loop" (saved search / sourcing loop).
+   * This replaces the legacy users/{uid}/loopMatches collection.
+   */
+  loopLinkage?: {
+    loopId: string;
+    platform?: string;
+    matchedAt?: Timestamp;
+    source?: "loop" | "manual" | "import";
+    legacyMatchId?: string;
+  };
+
+  /**
+   * Convenience flag for fast queries/filters.
+   * Firestore rules may require hasLoop=true when loopLinkage exists.
+   */
+  hasLoop?: boolean;
+
+  /**
+   * Optional top-level tags (some parts of the app use notes.tags, some use root tags).
+   * Keeping both for compatibility.
+   */
+  tags?: string[];
+
   matching?: MatchingBlock;
   priority?: PriorityBlock;
   cvLinkage?: { cvVersionId?: string; profileVersionId?: string };
@@ -182,8 +245,8 @@ export type HistoryEventDoc = {
 
   // FIELD_CHANGE
   fieldPath?: string;
-  oldValue?: any;
-  newValue?: any;
+  oldValue?: unknown;
+  newValue?: unknown;
 
   // COMMENT
   comment?: string;
@@ -192,4 +255,4 @@ export type HistoryEventDoc = {
   rejectionReasonCode?: RejectionReasonCode;
 };
 
-export type DotPatch = Record<string, any>;
+export type DotPatch = Record<string, unknown>;

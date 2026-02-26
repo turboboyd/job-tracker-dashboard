@@ -15,6 +15,7 @@ import {
  * - Computes a simple score
  * - Produces matchedSkillsTop + gapsTop
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function computeMatching(
   user: UserDoc | null,
   app: ApplicationDoc,
