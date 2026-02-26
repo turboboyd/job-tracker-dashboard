@@ -1,4 +1,23 @@
 {
-  "title": "CV Builder",
-  "subtitle": "Coming soon. Build a clean CV from your profile and export it."
+  "cvBuilder": {
+    "title": "CV Builder",
+    "subtitle": "Upload CV versions and link them to applications.",
+    "upload": {
+      "title": "Upload CV",
+      "file": "File",
+      "label": "Label",
+      "labelPh": "e.g. Frontend CV v3",
+      "notes": "Notes",
+      "notesPh": "Optional notes…",
+      "upload": "Upload",
+      "uploading": "Uploading…"
+    },
+    "list": {
+      "title": "CV Versions",
+      "refresh": "Refresh",
+      "loading": "Loading…",
+      "empty": "No CV versions yet.",
+      "open": "Open"
+    }
+  }
 }

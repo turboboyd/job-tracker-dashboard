@@ -1,0 +1,36 @@
+{
+  "applicationDetails": {
+    "back": "← Zurück",
+    "titleFallback": "Bewerbung",
+    "priority": "Priorität",
+    "actions": "Aktionen",
+    "comment": "Kommentar hinzufügen",
+    "commentPh": "Kurze Notiz…",
+    "add": "Hinzufügen",
+    "summary": "Übersicht",
+    "loading": "Laden…",
+    "notFound": "Nicht gefunden",
+    "company": "Firma",
+    "role": "Position",
+    "source": "Quelle",
+    "status": "Status",
+    "followup": "Follow-up",
+    "reapply": "Erneut bewerben",
+    "yes": "Ja",
+    "no": "Nein",
+    "matching": "Matching",
+    "noMatching": "Noch keine Matching-Daten. Füge Beschreibung oder Skills hinzu.",
+    "decision": "Entscheidung",
+    "matched": "Treffer",
+    "gaps": "Lücken",
+    "computedAt": "Berechnet",
+    "confidence": "Sicherheit",
+    "history": "Verlauf",
+    "noHistory": "Noch kein Verlauf.",
+    "historyFilter": {
+      "all": "Alle",
+      "statuses": "Status",
+      "comments": "Kommentare"
+    }
+  }
+}

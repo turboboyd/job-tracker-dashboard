@@ -1,0 +1,36 @@
+{
+  "applicationDetails": {
+    "back": "← Назад к заявкам",
+    "titleFallback": "Заявка",
+    "priority": "Приоритет",
+    "actions": "Действия",
+    "comment": "Добавить комментарий",
+    "commentPh": "Короткая заметка…",
+    "add": "Добавить",
+    "summary": "Сводка",
+    "loading": "Загрузка…",
+    "notFound": "Не найдено",
+    "company": "Компания",
+    "role": "Должность",
+    "source": "Источник",
+    "status": "Статус",
+    "followup": "Follow-up",
+    "reapply": "Повторная подача",
+    "yes": "Да",
+    "no": "Нет",
+    "matching": "Matching",
+    "noMatching": "Нет данных matching. Добавь описание или навыки.",
+    "decision": "Решение",
+    "matched": "Совпало",
+    "gaps": "Пробелы",
+    "computedAt": "Посчитано",
+    "confidence": "Уверенность",
+    "history": "История",
+    "noHistory": "Истории пока нет.",
+    "historyFilter": {
+      "all": "Все",
+      "statuses": "Статусы",
+      "comments": "Комментарии"
+    }
+  }
+}

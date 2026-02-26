@@ -1,7 +1,13 @@
-export function stripUndefined<T extends Record<string, unknown>>(obj: T): T {
-  const out: Record<string, unknown> = {};
+function stripUndefined<T extends Record<string, any>>(obj: T): T {
+  const out: any = Array.isArray(obj) ? [] : {};
   for (const [k, v] of Object.entries(obj)) {
-    if (v !== undefined) out[k] = v;
+    if (v === undefined) continue;
+    if (v && typeof v === "object" && !("toDate" in v) && !(v instanceof Date)) {
+
+      out[k] = stripUndefined(v);
+    } else {
+      out[k] = v;
+    }
   }
-  return out as T;
+  return out;
 }

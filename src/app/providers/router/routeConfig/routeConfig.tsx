@@ -15,6 +15,7 @@ import {
   MatchesPage,
   BoardPage,
   ApplicationsPage,
+  ApplicationDetailsPage,
   QuestionsPage,
   CvCheckerPage,
   CvBuilderPage,
@@ -42,6 +43,7 @@ export enum AppRoutes {
   DASHBOARD_ACTIVITY = "dashboard_activity",
 
   APPLICATIONS = "applications",
+  APPLICATION_DETAILS = "application_details",
   QUESTIONS = "questions",
   CV_CHECKER = "cv_checker",
   CV_BUILDER = "cv_builder",
@@ -76,6 +78,7 @@ export const RoutePath: Record<AppRoutes, string> = {
   [AppRoutes.DASHBOARD_ACTIVITY]: "/dashboard/activity",
 
   [AppRoutes.APPLICATIONS]: "/dashboard/applications",
+  [AppRoutes.APPLICATION_DETAILS]: "/dashboard/applications/:appId",
   [AppRoutes.QUESTIONS]: "/dashboard/questions",
   [AppRoutes.CV_CHECKER]: "/dashboard/cv-checker",
   [AppRoutes.CV_BUILDER]: "/dashboard/cv-builder",
@@ -128,6 +131,7 @@ export const privateRoutes: RouteItem[] = [
   },
 
   { path: RoutePath[AppRoutes.APPLICATIONS], element: <ApplicationsPage /> },
+  { path: RoutePath[AppRoutes.APPLICATION_DETAILS], element: <ApplicationDetailsPage /> },
   { path: RoutePath[AppRoutes.QUESTIONS], element: <QuestionsPage /> },
   { path: RoutePath[AppRoutes.CV_CHECKER], element: <CvCheckerPage /> },
   { path: RoutePath[AppRoutes.CV_BUILDER], element: <CvBuilderPage /> },

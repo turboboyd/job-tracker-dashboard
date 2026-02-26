@@ -21,6 +21,17 @@ service cloud.firestore {
       return (v is string) && (v.size() > 0);
     }
 
+    function isOptionalString(v) {
+      return !(v is string) || v.size() >= 0;
+    }
+
+    function isValidEnum(v, allowed) {
+      return (v is string) && (allowed.hasAny([v]));
+    }
+
+    // ----------------------------
+    // Existing rules (kept)
+    // ----------------------------
     function isValidLoop(data) {
       return data.keys().hasOnly([
         "name",
@@ -91,8 +102,6 @@ service cloud.firestore {
     // Favorites: users/{uid}/private/resourcesFavorites
     // ----------------------------
     function isValidResourceFavorites(data) {
-      // We keep it strict on allowed fields + list size,
-      // but avoid .all() to prevent parser/linter issues.
       return data.keys().hasOnly(["ids", "updatedAt", "userId"])
         && ("ids" in data)
         && (data.ids is list)
@@ -114,40 +123,6 @@ service cloud.firestore {
       allow update: if isSelf(userId)
         && isValidResourceFavorites(request.resource.data)
         && favoritesUserIdUnchanged();
-
-      allow delete: if isSelf(userId);
-    }
-
-    // ----------------------------
-    // Private per-user data
-    // ----------------------------
-
-    // Root user doc (users/{uid}) — required for aggregation calls like getCountFromServer()
-    match /users/{userId} {
-      allow read: if isSelf(userId);
-      allow write: if false;
-    }
-
-    match /users/{userId}/loops/{loopId} {
-      allow read: if isSelf(userId);
-
-      allow create: if isSelf(userId) && isValidLoop(request.resource.data);
-
-      allow update: if isSelf(userId)
-        && isValidLoop(request.resource.data)
-        && loopCreatedAtUnchanged();
-
-      allow delete: if isSelf(userId);
-    }
-
-    match /users/{userId}/loopMatches/{matchId} {
-      allow read: if isSelf(userId);
-
-      allow create: if isSelf(userId) && isValidLoopMatch(request.resource.data);
-
-      allow update: if isSelf(userId)
-        && isValidLoopMatch(request.resource.data)
-        && matchCreatedAtUnchanged();
 
       allow delete: if isSelf(userId);
     }
@@ -236,6 +211,209 @@ service cloud.firestore {
     match /publicStats/{docId} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // ----------------------------
+    // NEW: Job Search Dashboard v1 (Firestore-only)
+    // users/{uid} + applications + history (+ optional: cv_versions/profile_versions/stats)
+    // ----------------------------
+
+    function isValidUserDoc(data) {
+      // From schema: createdAt, updatedAt, profile, skills, matchSettings :contentReference[oaicite:2]{index=2}
+      return data.keys().hasOnly(["createdAt", "updatedAt", "profile", "skills", "matchSettings"])
+        && (data.createdAt is timestamp)
+        && (data.updatedAt is timestamp)
+        && (data.profile is map)
+        && (data.skills is list)
+        && (data.matchSettings is map);
+    }
+
+    function userCreatedAtUnchanged() {
+      return request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function isValidStatus(s) {
+      return isValidEnum(s, [
+        "SAVED","PLANNED","APPLIED","VIEWED",
+        "INTERVIEW_1","INTERVIEW_2","TEST_TASK",
+        "OFFER","REJECTED","NO_RESPONSE"
+      ]);
+    }
+
+    function isValidWorkMode(v) {
+      return !(v is string) || v in ["REMOTE","HYBRID","ON_SITE"];
+    }
+
+    function isValidEmploymentType(v) {
+      return !(v is string) || v in ["FULL_TIME","PART_TIME","CONTRACT"];
+    }
+
+    function isValidRemotePreference(v) {
+      return !(v is string) || v in ["REMOTE_ONLY","HYBRID_OK","ON_SITE_OK"];
+    }
+
+    function isValidApplicationCore(data) {
+      // Minimal strictness: enforce required blocks + allow optional ones as in schema :contentReference[oaicite:3]{index=3}
+      return data.keys().hasOnly([
+        "createdAt","updatedAt","createdBy","archived",
+        "job","process","notes","vacancy","matching","priority","cvLinkage"
+      ])
+      && (data.createdAt is timestamp)
+      && (data.updatedAt is timestamp)
+      && (data.createdBy is string)
+      && (data.archived is bool)
+      && (data.job is map)
+      && (data.process is map);
+    }
+
+    function isValidJob(job) {
+      return job.keys().hasOnly([
+        "companyName","companyId","roleTitle","locationText","vacancyUrl","source","postedAt",
+        "salary","employmentType","workMode"
+      ])
+      && isNonEmptyString(job.companyName)
+      && isNonEmptyString(job.roleTitle)
+      && (!("companyId" in job) || (job.companyId is string))
+      && (!("locationText" in job) || (job.locationText is string))
+      && (!("vacancyUrl" in job) || (job.vacancyUrl is string))
+      && (!("source" in job) || (job.source is string))
+      && (!("postedAt" in job) || (job.postedAt is timestamp))
+      && (!("salary" in job) || (job.salary is map))
+      && (!("employmentType" in job) || isValidEmploymentType(job.employmentType))
+      && (!("workMode" in job) || isValidWorkMode(job.workMode));
+    }
+
+    function isValidProcess(p) {
+      return p.keys().hasOnly([
+        "status","lastStatusChangeAt","nextActionAt","nextActionText",
+        "contactAttempts","lastContactAt","lastFollowUpAt",
+        "followUpLevel","needsFollowUp","followUpDueAt",
+        "needsReapplySuggestion","reapplyEligibleAt","reapplyReason"
+      ])
+      && ("status" in p) && isValidStatus(p.status)
+      && ("lastStatusChangeAt" in p) && (p.lastStatusChangeAt is timestamp)
+      && (!("nextActionAt" in p) || (p.nextActionAt is timestamp))
+      && (!("nextActionText" in p) || (p.nextActionText is string))
+      && (!("contactAttempts" in p) || (p.contactAttempts is number))
+      && (!("lastContactAt" in p) || (p.lastContactAt is timestamp))
+      && (!("lastFollowUpAt" in p) || (p.lastFollowUpAt is timestamp))
+      && (!("followUpLevel" in p) || (p.followUpLevel is number))
+      && (!("needsFollowUp" in p) || (p.needsFollowUp is bool))
+      && (!("followUpDueAt" in p) || (p.followUpDueAt is timestamp))
+      && (!("needsReapplySuggestion" in p) || (p.needsReapplySuggestion is bool))
+      && (!("reapplyEligibleAt" in p) || (p.reapplyEligibleAt is timestamp))
+      && (!("reapplyReason" in p) || (p.reapplyReason is string));
+    }
+
+    function applicationCreatedAtUnchanged() {
+      return request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    function applicationCreatedByUnchanged() {
+      return request.resource.data.createdBy == resource.data.createdBy;
+    }
+
+    function isValidHistoryEvent(data) {
+      // From schema: createdAt, actor, type + type-specific fields :contentReference[oaicite:4]{index=4}
+      return data.keys().hasOnly([
+        "createdAt","actor","type",
+        "fromStatus","toStatus",
+        "fieldPath","oldValue","newValue",
+        "comment","feedbackType","sentiment","rejectionReasonCode"
+      ])
+      && (data.createdAt is timestamp)
+      && (data.actor is string) && (data.actor in ["user","system"])
+      && (data.type is string) && (data.type in ["STATUS_CHANGE","FIELD_CHANGE","COMMENT","SYSTEM"])
+      && (
+        (data.type == "STATUS_CHANGE" && (data.fromStatus is string) && (data.toStatus is string))
+        ||
+        (data.type == "FIELD_CHANGE" && (data.fieldPath is string) && ("oldValue" in data) && ("newValue" in data))
+        ||
+        (data.type == "COMMENT" && (data.comment is string) && (data.comment.size() > 0))
+        ||
+        (data.type == "SYSTEM")
+      );
+    }
+
+    // Root user doc (NOW writable for profile/skills/matchSettings)
+    match /users/{userId} {
+      allow read: if isSelf(userId);
+
+      allow create: if isSelf(userId) && isValidUserDoc(request.resource.data);
+      allow update: if isSelf(userId)
+        && isValidUserDoc(request.resource.data)
+        && userCreatedAtUnchanged();
+
+      allow delete: if false;
+    }
+
+    // Keep existing loops + loopMatches (as in your rules)
+    match /users/{userId}/loops/{loopId} {
+      allow read: if isSelf(userId);
+
+      allow create: if isSelf(userId) && isValidLoop(request.resource.data);
+
+      allow update: if isSelf(userId)
+        && isValidLoop(request.resource.data)
+        && loopCreatedAtUnchanged();
+
+      allow delete: if isSelf(userId);
+    }
+
+    match /users/{userId}/loopMatches/{matchId} {
+      allow read: if isSelf(userId);
+
+      allow create: if isSelf(userId) && isValidLoopMatch(request.resource.data);
+
+      allow update: if isSelf(userId)
+        && isValidLoopMatch(request.resource.data)
+        && matchCreatedAtUnchanged();
+
+      allow delete: if isSelf(userId);
+    }
+
+    // NEW: applications
+    match /users/{userId}/applications/{appId} {
+      allow read: if isSelf(userId);
+
+      allow create: if isSelf(userId)
+        && isValidApplicationCore(request.resource.data)
+        && isValidJob(request.resource.data.job)
+        && isValidProcess(request.resource.data.process)
+        && (request.resource.data.createdBy == uid());
+
+      allow update: if isSelf(userId)
+        && isValidApplicationCore(request.resource.data)
+        && isValidJob(request.resource.data.job)
+        && isValidProcess(request.resource.data.process)
+        && applicationCreatedAtUnchanged()
+        && applicationCreatedByUnchanged();
+
+      allow delete: if isSelf(userId);
+
+      // NEW: history subcollection (Firestore-only => allow create, forbid update/delete)
+      match /history/{historyId} {
+        allow read: if isSelf(userId);
+        allow create: if isSelf(userId) && isValidHistoryEvent(request.resource.data);
+        allow update, delete: if false;
+      }
+    }
+
+    // Optional per schema :contentReference[oaicite:5]{index=5}
+    match /users/{userId}/cv_versions/{cvId} {
+      allow read: if isSelf(userId);
+      allow create, update: if isSelf(userId);
+      allow delete: if false;
+    }
+
+    match /users/{userId}/profile_versions/{pvId} {
+      allow read: if isSelf(userId);
+      allow create, update, delete: if false;
+    }
+
+    match /users/{userId}/stats/{statId} {
+      allow read: if isSelf(userId);
+      allow create, update, delete: if false;
     }
   }
 }
